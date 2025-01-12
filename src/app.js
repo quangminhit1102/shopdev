@@ -1,0 +1,32 @@
+const express = require("express");
+const app = express();
+const morgan = require("morgan");
+const { default: helmet } = require("helmet");
+const compression = require("compression");
+
+// Init middleware
+
+// Logging
+//app.use(morgan("dev"));
+app.use(morgan("combined"));
+// app.use(morgan("short"));
+// app.use(morgan("tiny"));
+
+// Helmet
+app.use(helmet());
+
+// Compression
+app.use(compression);
+
+// Init database
+
+// Init routes
+app.get("/", (req, res, next) => {
+  return res.status(200).json({
+    message: "Hello world",
+  });
+});
+
+// Handling errors
+
+module.exports = app;
