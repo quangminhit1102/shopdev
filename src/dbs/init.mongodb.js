@@ -2,12 +2,14 @@
 
 const mongoose = require("mongoose");
 const { countConnect } = require("../helpers/check.connect");
+const configMongodb = require("../configs/config.mongodb");
 const connectString = "mongodb://localhost:27017/express-mongo";
 
 class Database {
   // Constructor
   constructor() {
     this.connect();
+    console.log(configMongodb);
   }
 
   // Connect to MongoDB.
