@@ -22,7 +22,9 @@ app.use(morgan("combined"));
 app.use(helmet());
 
 // Compression
-app.use(compression);
+/* Reduced Data Transfer Size: Compression significantly reduces the size of data sent over the network, typically achieving 60-80% reduction for text-based content.
+app.use(compression); */
+
 
 // Init database
 
