@@ -4,8 +4,8 @@ const express = require("express");
 
 const router = express.Router();
 
-router.get("", (req, res, next) => {
-  res.send("Hello world");
-});
+// Access router
+router.use("/access", require("./access"));
 
+// Export router
 module.exports = router;
