@@ -4,8 +4,8 @@ const {
   app: { port: PORT },
 } = require("./src/configs/config.mongodb");
 
-const server = app.listen(3000, () => {
-  // console.log(`Server running on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Add event listener for SIGINT signal (Ctrl+C)
@@ -15,4 +15,3 @@ process.on("sigint", () => {
     console.log("Process terminated");
   });
 });
-

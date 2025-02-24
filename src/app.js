@@ -7,6 +7,7 @@ const compression = require("compression");
 
 // Init database
 require("./dbs/init.mongodb");
+
 // checkOverload();
 
 // Init middleware
@@ -22,7 +23,7 @@ app.use(helmet());
 
 // Compression
 /* Reduced Data Transfer Size: Compression significantly reduces the size of data sent over the network, typically achieving 60-80% reduction for text-based content.*/
-app.use(compression);
+app.use(compression());
 
 // Init database
 
