@@ -31,10 +31,10 @@ var shopSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Boolean,
       default: false,
     },
-    // roles: {
-    //   type: array,
-    //   default: [],
-    // },
+    roles: {
+      type: String,
+      default: [],
+    },
   },
   {
     timestamps: true,

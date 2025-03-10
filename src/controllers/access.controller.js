@@ -1,10 +1,6 @@
 "use strict";
 
 class AccessController {
-  static async getAccess(req, res, next) {
-    res.send("Hello world");
-  }
-
   static async login(req, res, next) {
     try {
       const { email, password } = req.body;
@@ -21,6 +17,7 @@ class AccessController {
       const result = await AccessService.register({ name, email, password });
       res.status(201).json(result);
     } catch (error) {
+      // Pass error to error handling middleware
       next(error);
     }
   }

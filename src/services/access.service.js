@@ -1,6 +1,7 @@
 "use strict";
 const shopModel = require("../models/shop.model");
 const JWT = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 class AccessService {
   static async getAccess() {
@@ -45,14 +46,38 @@ class AccessService {
         { expiresIn: "1d" }
       );
 
+      // Hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      password = hashedPassword;
+
+      // Email already exists
+      const existingUser = await shop
+        .findOne({ email })
+        .lean() // .lean() to return a plain JavaScript object instead of a Mongoose document
+        .exec(); // .exec() to execute the query and return a promise;
+      if (existingUser) {
+        return {
+          code: 400,
+          message: "Email already exists",
+        };
+      }
+
       // Create new shop/user in database
-      // This is a placeholder - implement actual database creation
       const newShop = await shopModel.create({
         email,
         password, // Should be hashed before storing
         verified: false,
         verificationToken,
       });
+
+      if (newShop) {
+        // Create private key and public key for shop
+        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+          modulusLength: 4096,
+        });
+        console.log(privateKey, publicKey);
+      }
 
       // Send verification email
       // Implement email sending logic here
