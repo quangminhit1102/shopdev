@@ -9,9 +9,7 @@ var shopSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
-      unique: true,
-      index: true,
+      default: "",
     },
     email: {
       type: String,
@@ -33,7 +31,7 @@ var shopSchema = new mongoose.Schema(
     },
     roles: {
       type: String,
-      default: [],
+      default: undefined,
     },
   },
   {

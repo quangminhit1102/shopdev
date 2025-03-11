@@ -2,6 +2,7 @@
 const shopModel = require("../models/shop.model");
 const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 class AccessService {
   static async getAccess() {
@@ -29,14 +30,14 @@ class AccessService {
       };
     } catch (error) {
       return {
-        code: 500,
+        code: 400,
         message: "Login failed",
         error: error.message,
       };
     }
   }
 
-  static async register() {
+  static async register({ name, email, password }) {
     try {
       // Input validation would go here
       const secretKey = process.env.JWT_SECRET || "your-secret-key";
@@ -52,7 +53,7 @@ class AccessService {
       password = hashedPassword;
 
       // Email already exists
-      const existingUser = await shop
+      const existingUser = await shopModel
         .findOne({ email })
         .lean() // .lean() to return a plain JavaScript object instead of a Mongoose document
         .exec(); // .exec() to execute the query and return a promise;
@@ -63,12 +64,11 @@ class AccessService {
         };
       }
 
-      // Create new shop/user in database
       const newShop = await shopModel.create({
+        name,
         email,
         password, // Should be hashed before storing
         verified: false,
-        verificationToken,
       });
 
       if (newShop) {
@@ -90,9 +90,10 @@ class AccessService {
       };
     } catch (error) {
       return {
-        code: 500,
+        success: false,
         message: "Registration failed",
-        error: error.message,
+        statusCode: 500,
+        errors: error.message,
       };
     }
   }
