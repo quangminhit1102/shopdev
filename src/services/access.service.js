@@ -3,6 +3,7 @@ const shopModel = require("../models/shop.model");
 const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const authUtils = require("../auth/authUtils");
 
 class AccessService {
   static async getAccess() {
@@ -39,14 +40,6 @@ class AccessService {
 
   static async register({ name, email, password }) {
     try {
-      // Input validation would go here
-      const secretKey = process.env.JWT_SECRET || "your-secret-key";
-      const verificationToken = JWT.sign(
-        { email: email, timestamp: Date.now() },
-        secretKey,
-        { expiresIn: "1d" }
-      );
-
       // Hash password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -73,9 +66,36 @@ class AccessService {
 
       if (newShop) {
         // Create private key and public key for shop
+        /**
+         * PEM format example for public key:
+         * -----BEGIN PUBLIC KEY-----
+         * MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890...
+         * -----END PUBLIC KEY-----
+         *
+         * PEM format example for private key:
+         * -----BEGIN PRIVATE KEY-----
+         * MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1234567890...
+         * -----END PRIVATE KEY-----
+         */
         const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-          modulusLength: 4096,
+          modulusLength: 2048, // Key size in bits
+          publicKeyEncoding: {
+            type: "spki", // Recommended format for public keys - Subject Public Key Info
+            format: "pem", // PEM format (most common)
+          },
+          privateKeyEncoding: {
+            type: "pkcs8", // Recommended format for private keys - Private-Key Information Syntax Standard
+            format: "pem", // PEM format (most common)
+            cipher: "rsa256", // Optional: encrypt the private key
+            passphrase: "your-secure-passphrase", // Optional: use a passphrase adds extra encryption to the private key
+          },
         });
+        const { token, refreshToken } = authUtils.createTokenPair(
+          { email },
+          publicKey,
+          privateKey
+        );
+
         console.log(privateKey, publicKey);
       }
 
