@@ -77,7 +77,7 @@ class AccessService {
          * MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1234567890...
          * -----END PRIVATE KEY-----
          */
-        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        const { privateKey, publicKey } = crypto.generateKeyPagit irSync("rsa", {
           modulusLength: 2048, // Key size in bits
           publicKeyEncoding: {
             type: "spki", // Recommended format for public keys - Subject Public Key Info
