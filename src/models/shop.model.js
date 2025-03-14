@@ -7,6 +7,9 @@ let COLLECTION_NAME = "Shops";
 // Declare the Schema of the Mongo model
 var shopSchema = new mongoose.Schema(
   {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
     name: {
       type: String,
       default: "",

@@ -4,6 +4,7 @@ const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const authUtils = require("../auth/authUtils");
+const { log } = require("console");
 
 class AccessService {
   static async getAccess() {
@@ -65,6 +66,7 @@ class AccessService {
       });
 
       if (newShop) {
+        log(`New shop created: ${newShop}`);
         // Create private key and public key for shop
         /**
          * PEM format example for public key:
@@ -77,26 +79,26 @@ class AccessService {
          * MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1234567890...
          * -----END PRIVATE KEY-----
          */
-        const { privateKey, publicKey } = crypto.generateKeyPagit irSync("rsa", {
+        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
           modulusLength: 2048, // Key size in bits
           publicKeyEncoding: {
             type: "spki", // Recommended format for public keys - Subject Public Key Info
             format: "pem", // PEM format (most common)
           },
-          privateKeyEncoding: {
-            type: "pkcs8", // Recommended format for private keys - Private-Key Information Syntax Standard
+          secretKeyEncoding: {
+            type: "secret", // Recommended format for secret keys
             format: "pem", // PEM format (most common)
-            cipher: "rsa256", // Optional: encrypt the private key
-            passphrase: "your-secure-passphrase", // Optional: use a passphrase adds extra encryption to the private key
           },
         });
+        const { _id: userId, email: email } = newShop;
         const { token, refreshToken } = authUtils.createTokenPair(
-          { email },
+          { userId, email },
           publicKey,
           privateKey
         );
 
-        console.log(privateKey, publicKey);
+        log(`Public key: ${token}`);
+        log(`Private key: ${refreshToken}`);
       }
 
       // Send verification email
