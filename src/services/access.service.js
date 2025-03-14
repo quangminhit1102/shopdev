@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const authUtils = require("../auth/authUtils");
 const { log } = require("console");
+const KeyTokenService = require("./keyToken.service");
 
 class AccessService {
   static async getAccess() {
@@ -90,6 +91,19 @@ class AccessService {
             format: "pem", // PEM format (most common)
           },
         });
+
+        // Save public key to database
+        const publicKeyString = await KeyTokenService.createKeyToken({
+          userId: newShop._id,
+          publicKey,
+        });
+        if (!publicKeyString) {
+          return {
+            code: 500,
+            message: "Failed to create public key",
+          };
+        }
+
         const { _id: userId, email: email } = newShop;
         const { token, refreshToken } = authUtils.createTokenPair(
           { userId, email },
