@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const authUtils = require("../auth/authUtils");
 const { log } = require("console");
 const KeyTokenService = require("./keyToken.service");
+const keyTokenModel = require("../models/keyToken.model");
 
 class AccessService {
   static async getAccess() {
@@ -14,22 +15,42 @@ class AccessService {
     return "Hello world";
   }
 
-  static async login() {
+  // Login a User
+  static async login({ email, password }) {
     try {
-      const secretKey = process.env.JWT_SECRET || "your-secret-key";
-
       // Assuming credentials would be passed to login method
       // Replace this with actual user validation
-      const userInfo = { userId: 1, email: "test@example.com" };
+      const userInfo = await shopModel.findOne({ email: email }).lean().exec();
+      if (!userInfo) {
+        return {
+          code: 400,
+          message: "Invalid email or password",
+        };
+      }
 
-      const token = await JWT.sign(userInfo, secretKey, {
+      // Compare password
+      const match = await bcrypt.compare(password, userInfo.password);
+      if (!match) {
+        return {
+          code: 400,
+          message: "Invalid email or password",
+        };
+      }
+
+      // Get private key from database
+      const { publicKey } = await keyTokenModel
+        .findOne({ userId: userInfo._id })
+        .lean()
+        .exec();
+
+      const token = await JWT.sign(userInfo, publicKey, {
         expiresIn: "2d",
       });
-
       return {
         code: 200,
         message: "Login successful",
         token,
+        refreshToken,
       };
     } catch (error) {
       return {
@@ -40,6 +61,7 @@ class AccessService {
     }
   }
 
+  // Register a new User
   static async register({ name, email, password }) {
     try {
       // Hash password
