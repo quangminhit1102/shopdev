@@ -8,7 +8,8 @@ const compression = require("compression");
 // parse application/json
 app.use(express.json());
 // parse application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
+// Extended allows for rich objects and arrays to be encoded into the URL-encoded format
+app.use(express.urlencoded({ extended: true })); 
 
 // Init database
 require("./dbs/init.mongodb");

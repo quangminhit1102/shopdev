@@ -38,20 +38,33 @@ class AccessService {
       }
 
       // Get private key from database
-      const { publicKey } = await keyTokenModel
+      const { publicKey, privateKey } = await keyTokenModel
         .findOne({ userId: userInfo._id })
         .lean()
         .exec();
 
-      const token = await JWT.sign(userInfo, publicKey, {
-        expiresIn: "2d",
+      // Verify token
+      JWT.verify(token, publicKey, (err, decoded) => {
+        if (err) {
+          return {
+            code: 401,
+            message: "Unauthorized",
+            error: "",
+          };
+        } else {
+          const { token, refreshToken } = authUtils.createTokenPair(
+            { email },
+            publicKey,
+            privateKey
+          );
+          return {
+            code: 200,
+            message: "Login successful",
+            token,
+            refreshToken,
+          };
+        }
       });
-      return {
-        code: 200,
-        message: "Login successful",
-        token,
-        refreshToken,
-      };
     } catch (error) {
       return {
         code: 400,
@@ -108,16 +121,20 @@ class AccessService {
             type: "spki", // Recommended format for public keys - Subject Public Key Info
             format: "pem", // PEM format (most common)
           },
-          secretKeyEncoding: {
-            type: "secret", // Recommended format for secret keys
+          privateKeyEncoding: {
+            type: "pkcs8", // Recommended format for private keys - Public-Key Cryptography Standards
             format: "pem", // PEM format (most common)
           },
         });
+
+        log(`publicKey: ${publicKey}`);
+        log(`privateKey: ${privateKey}`);
 
         // Save public key to database
         const publicKeyString = await KeyTokenService.createKeyToken({
           userId: newShop._id,
           publicKey,
+          privateKey,
         });
         if (!publicKeyString) {
           return {
@@ -126,26 +143,34 @@ class AccessService {
           };
         }
 
-        const { _id: userId, email: email } = newShop;
-        const { token, refreshToken } = authUtils.createTokenPair(
-          { userId, email },
+        const { token, refreshToken } = await authUtils.createTokenPair(
+          { _id: newShop._id, email: newShop.email, name: newShop.name },
           publicKey,
           privateKey
         );
 
-        log(`Public key: ${token}`);
-        log(`Private key: ${refreshToken}`);
+        log(`token: ${token}`);
+        log(`refreshToken: ${refreshToken}`);
+
+        // Send verification email
+        // Implement email sending logic here
+
+        return {
+          code: 201,
+          message:
+            "Registration successful. Please check your email to verify account.",
+          data: {
+            shop: {
+              _id: newShop._id,
+              email: newShop.email,
+              name: newShop.name,
+              email: newShop.email,
+            },
+            token,
+            refreshToken,
+          },
+        };
       }
-
-      // Send verification email
-      // Implement email sending logic here
-
-      return {
-        code: 201,
-        message:
-          "Registration successful. Please check your email to verify account.",
-        data: { email: newShop.email },
-      };
     } catch (error) {
       return {
         success: false,
