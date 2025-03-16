@@ -10,8 +10,6 @@ const keyTokenModel = require("../models/keyToken.model");
 
 class AccessService {
   static async getAccess() {
-    let a = shopModel.findOne();
-    console.log(a);
     return "Hello world";
   }
 
@@ -43,28 +41,18 @@ class AccessService {
         .lean()
         .exec();
 
-      // Verify token
-      JWT.verify(token, publicKey, (err, decoded) => {
-        if (err) {
-          return {
-            code: 401,
-            message: "Unauthorized",
-            error: "",
-          };
-        } else {
-          const { token, refreshToken } = authUtils.createTokenPair(
-            { email },
-            publicKey,
-            privateKey
-          );
-          return {
-            code: 200,
-            message: "Login successful",
-            token,
-            refreshToken,
-          };
-        }
-      });
+      // Create token pair
+      const { token, refreshToken } = await authUtils.createTokenPair(
+        { email },
+        publicKey,
+        privateKey
+      );
+      return {
+        code: 200,
+        message: "Login successful",
+        token,
+        refreshToken,
+      };
     } catch (error) {
       return {
         code: 400,
