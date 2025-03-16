@@ -7,6 +7,7 @@ const authUtils = require("../auth/authUtils");
 const { log } = require("console");
 const KeyTokenService = require("./keyToken.service");
 const keyTokenModel = require("../models/keyToken.model");
+const { getObjectInformation } = require("../utils");
 
 class AccessService {
   static async getAccess() {
@@ -43,7 +44,7 @@ class AccessService {
 
       // Create token pair
       const { token, refreshToken } = await authUtils.createTokenPair(
-        { email },
+        getObjectInformation(["_id", "email", "name"], userInfo),
         publicKey,
         privateKey
       );
@@ -132,7 +133,7 @@ class AccessService {
         }
 
         const { token, refreshToken } = await authUtils.createTokenPair(
-          { _id: newShop._id, email: newShop.email, name: newShop.name },
+          getObjectInformation(["_id", "email", "name"], newShop),
           publicKey,
           privateKey
         );
@@ -157,6 +158,11 @@ class AccessService {
             token,
             refreshToken,
           },
+        };
+      } else {
+        return {
+          code: 500,
+          message: "Registration failed",
         };
       }
     } catch (error) {
