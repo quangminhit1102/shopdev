@@ -9,11 +9,21 @@ var apiKeySchema = new mongoose.Schema(
     id: {
       type: mongoose.Schema.Types.ObjectId,
     },
-    apiKey: {
+    Key: {
       type: String,
+      required: true,
     },
     type: {
       type: String,
+    },
+    status: {
+      type: Boolean,
+      default: true,
+    },
+    permissions: {
+      type: [String],
+      required: true,
+      enum: ["read", "write", "delete"],
     },
   },
   {
