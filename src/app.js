@@ -9,7 +9,7 @@ const compression = require("compression");
 app.use(express.json());
 // parse application/x-www-form-urlencoded
 // Extended allows for rich objects and arrays to be encoded into the URL-encoded format
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 
 // Init database
 require("./dbs/init.mongodb");
@@ -37,6 +37,19 @@ app.use(compression());
 app.use("/", require("./routers"));
 
 // Handling errors
+// 404 Not Found
+app.use((req, res, next) => {
+  const error = new Error("Not Found");
+  res.status(404).json({ message: error.message });
+  next(); // pass the error to the next error middleware
+});
+
+// 500 Internal Server Error
+app.use((err, req, res, next) => {
+  const status = err.status || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message: message });
+});
 
 // export app
 module.exports = app;
