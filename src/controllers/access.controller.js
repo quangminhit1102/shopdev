@@ -1,5 +1,7 @@
 "use strict";
 
+const AccessService = require("../services/access.service");
+
 class AccessController {
   static async login(req, res, next) {
     try {

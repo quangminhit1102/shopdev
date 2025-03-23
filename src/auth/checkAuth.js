@@ -11,11 +11,11 @@ const HEADER = {
 
 const apiKey = async (req, res, next) => {
   try {
-    await apiKeyModel.create({
-      Key: crypto.randomBytes(64).toString("hex"),
-      type: "admin",
-      permissions: ["read", "write", "delete"],
-    });
+    // await apiKeyModel.create({
+    //   Key: crypto.randomBytes(64).toString("hex"),
+    //   type: "admin",
+    //   permissions: ["read", "write", "delete"],
+    // });
 
     // Get the API key from the headers
     let key = req.headers[HEADER.API_KEY];
@@ -54,4 +54,14 @@ const permission = (permission) => {
   };
 };
 
-module.exports = apiKey;
+const asyncHandler = async (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+};
+
+module.exports = {
+  apiKey,
+  permission,
+  asyncHandler,
+};

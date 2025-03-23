@@ -8,6 +8,7 @@ const { log } = require("console");
 const KeyTokenService = require("./keyToken.service");
 const keyTokenModel = require("../models/keyToken.model");
 const { getObjectInformation } = require("../utils");
+const { BadRequestError } = require("../core/error.response");
 
 class AccessService {
   static async getAccess() {
@@ -77,10 +78,7 @@ class AccessService {
         .lean() // .lean() to return a plain JavaScript object instead of a Mongoose document
         .exec(); // .exec() to execute the query and return a promise;
       if (existingUser) {
-        return {
-          code: 400,
-          message: "Email already exists",
-        };
+        throw new BadRequestError("Email already exists");
       }
 
       const newShop = await shopModel.create({
