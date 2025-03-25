@@ -19,9 +19,9 @@ require("./dbs/init.mongodb");
 // Init middleware
 
 // Logging
-//app.use(morgan("dev"));
+app.use(morgan("dev"));
 // app.use(morgan("combined"));
-app.use(morgan("short"));
+// app.use(morgan("short"));
 // app.use(morgan("tiny"));
 
 // Helmet

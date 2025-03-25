@@ -12,6 +12,7 @@ const {
   BadRequestError,
   InternalServerError,
 } = require("../core/error.response");
+const { CREATED } = require("../core/success.response");
 
 class AccessService {
   static async getAccess() {
@@ -46,12 +47,7 @@ class AccessService {
         publicKey,
         privateKey
       );
-      return {
-        code: 200,
-        message: "Login successful",
-        token,
-        refreshToken,
-      };
+      return OK("Login successful", { token, refreshToken });
     } catch (error) {
       throw new InternalServerError("Failed to login");
     }
@@ -105,8 +101,8 @@ class AccessService {
         },
       });
 
-      log(`publicKey: ${publicKey}`);
-      log(`privateKey: ${privateKey}`);
+      // log(`publicKey: ${publicKey}`);
+      // log(`privateKey: ${privateKey}`);
 
       // Save public key to database
       const publicKeyString = await KeyTokenService.createKeyToken({
@@ -124,27 +120,25 @@ class AccessService {
         privateKey
       );
 
-      log(`token: ${token}`);
-      log(`refreshToken: ${refreshToken}`);
+      // log(`token: ${token}`);
+      // log(`refreshToken: ${refreshToken}`);
 
       // Send verification email
       // Implement email sending logic here
 
-      return {
-        code: 201,
+      return new CREATED({
         message:
           "Registration successful. Please check your email to verify account.",
-        data: {
+        metadata: {
           shop: {
             _id: newShop._id,
             email: newShop.email,
             name: newShop.name,
-            email: newShop.email,
           },
           token,
           refreshToken,
         },
-      };
+      }).send(res);
     } else {
       throw new InternalServerError("Failed to registration");
     }

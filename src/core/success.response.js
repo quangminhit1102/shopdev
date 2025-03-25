@@ -1,12 +1,13 @@
 "use strict";
 
+const statusCode = {
+  OK: 200,
+  CREATED: 201,
+  ACCEPTED: 202,
+};
+
 class SuccessResponse {
-  constructor({
-    message,
-    statusCode = 200,
-    reasonStatusCode = "OK",
-    metadata = {},
-  }) {
+  constructor({ message, statusCode = statusCode.OK, metadata = {} }) {
     this.message = message;
     this.status = statusCode;
     this.metadata = metadata;
@@ -25,12 +26,8 @@ class OK extends SuccessResponse {
 
 class CREATED extends SuccessResponse {
   constructor({ message, metadata }) {
-    super({ message, statusCode: 201, reasonStatusCode: "Created", metadata });
+    super({ message, statusCode: statusCode.CREATED, metadata });
   }
 }
 
-module.exports = {
-  OK,
-  CREATED,
-  SuccessResponse,
-};
+module.exports = { OK, CREATED, SuccessResponse };
