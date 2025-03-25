@@ -1,5 +1,6 @@
 "use strict";
 
+const { error, log } = require("console");
 const apiKeyModel = require("../models/apiKey.model");
 const { findAPIKey } = require("../services/apiKey.service");
 const crypto = require("crypto");
@@ -56,7 +57,9 @@ const permission = (permission) => {
 
 const asyncHandler = (fn) => {
   return (req, res, next) => {
-    fn(req, res, next).catch(next);
+    fn(req, res, next).catch((error) => {
+      next(error);
+    });
   };
 };
 
