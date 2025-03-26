@@ -1,4 +1,5 @@
 "use strict";
+const { Types } = require("mongoose");
 const KeyTokenModel = require("../models/keyToken.model");
 
 class KeyTokenService {
@@ -11,6 +12,16 @@ class KeyTokenService {
         privateKey: privateKey,
       });
       return tokens ? userId : null;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  static findKeyByUserId = async (userId) => {
+    try {
+      return await KeyTokenModel.findOne({
+        userId: new Types.ObjectId(userId),
+      }).lean();
     } catch (error) {
       throw error;
     }

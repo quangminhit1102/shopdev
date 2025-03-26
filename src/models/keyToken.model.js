@@ -16,6 +16,9 @@ var keyTokenSchema = new mongoose.Schema(
     privateKey: {
       type: String,
     },
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
