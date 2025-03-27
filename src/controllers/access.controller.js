@@ -18,6 +18,13 @@ class AccessController {
     }).send(res);
   }
 
+  static async logout(req, res, next) {
+    new OK({
+      message: "Logout successful",
+      metadata: await AccessService.logout(req.keyStore),
+    }).send(res);
+  }
+
   static async getAccess(req, res, next) {
     new OK({
       message: "Access granted",

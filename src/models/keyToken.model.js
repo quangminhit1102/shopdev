@@ -26,5 +26,14 @@ var keyTokenSchema = new mongoose.Schema(
   }
 );
 
+const removeKeyById = async (keyStore) => {
+  try {
+    const key = await KeyTokenModel.findByIdAndRemove(keyStore);
+    return key;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //Export the model
 module.exports = mongoose.model(DOCUMENT_NAME, keyTokenSchema);

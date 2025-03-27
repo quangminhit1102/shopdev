@@ -48,6 +48,11 @@ class AccessService {
     return { token, refreshToken };
   }
 
+  static async logout({ keyStore }) {
+    const delKey = await keyTokenModel.removeKeyById({ keyStore });
+    return delKey;
+  }
+
   // Register a new User
   static async register({ name, email, password }) {
     // Hash password

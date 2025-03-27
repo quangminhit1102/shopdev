@@ -13,6 +13,8 @@ router.post("/register", asyncHandler(AccessController.register));
 // Authentication
 router.use(authenticate);
 
+router.post("/logout", asyncHandler(AccessController.logout));
+
 router.get("", asyncHandler(AccessController.getAccess));
 
 module.exports = router;
