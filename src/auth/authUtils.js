@@ -36,7 +36,7 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
   return { token, refreshToken };
 };
 
-const authenticate =  async (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const token = req.headers[HEADER.AUTHORIZATION];
   const userId = req.headers[HEADER.CLIENT_ID];
 
@@ -47,15 +47,13 @@ const authenticate =  async (req, res, next) => {
   var key = await KeyTokenService.findKeyByUserId(userId);
   if (!key) throw new NotFoundError("Key not found");
 
-  try {
-    const decoded = JWT.verify(token, key.publicKey, (err, user) => {
-      if (err) throw new AuthFailureError("Unauthorized");
-      req.user = user;
-      next();
-    });
-  } catch (error) {
-    throw new AuthFailureError("Unauthorized");
-  }
+  // verify token
+  const decoded = JWT.verify(token, key.publicKey, (err, user) => {
+    if (err) throw new AuthFailureError(err.message);
+    req.key = key;
+    console.log("Decoded user:", user);
+    next();
+  });
 };
 
 module.exports = { createTokenPair, authenticate };

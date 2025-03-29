@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 
-const getObjectInformation = ({ field = [], object = {} }) => {
+const getObjectInformation = (field = [], object = {}) => {
   return _.pick(object, field);
 };
 

@@ -49,7 +49,7 @@ class AccessService {
   }
 
   static async logout({ keyStore }) {
-    const delKey = await keyTokenModel.removeKeyById({ keyStore });
+    const delKey = await KeyTokenService.removeKeyById(keyStore);
     return delKey;
   }
 

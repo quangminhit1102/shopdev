@@ -26,6 +26,15 @@ class KeyTokenService {
       throw error;
     }
   };
+
+  static removeKeyById = async (keyStore) => {
+    try {
+      const key = await KeyTokenModel.findByIdAndDelete(keyStore);
+      return key;
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 module.exports = KeyTokenService;

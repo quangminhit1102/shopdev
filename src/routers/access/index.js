@@ -11,7 +11,7 @@ router.post("/login", asyncHandler(AccessController.login));
 router.post("/register", asyncHandler(AccessController.register));
 
 // Authentication
-router.use(authenticate);
+router.use(asyncHandler(authenticate));
 
 router.post("/logout", asyncHandler(AccessController.logout));
 
