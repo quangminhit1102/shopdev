@@ -50,7 +50,7 @@ const authenticate = async (req, res, next) => {
   // verify token
   const decoded = JWT.verify(token, key.publicKey, (err, user) => {
     if (err) throw new AuthFailureError(err.message);
-    req.key = key;
+    req.keyStore = key;
     console.log("Decoded user:", user);
     next();
   });
