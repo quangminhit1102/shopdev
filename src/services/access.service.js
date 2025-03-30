@@ -11,6 +11,8 @@ const { getObjectInformation } = require("../utils");
 const {
   BadRequestError,
   InternalServerError,
+  NotFoundError,
+  ForbiddenError,
 } = require("../core/error.response");
 const { CREATED, OK } = require("../core/success.response");
 
@@ -33,11 +35,18 @@ class AccessService {
       throw new BadRequestError("Invalid email or password");
     }
 
-    // Get private key from database
-    const { publicKey, privateKey } = await keyTokenModel
-      .findOne({ userId: userInfo._id })
-      .lean()
-      .exec();
+    // Create private key and public key for shop
+    const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+      modulusLength: 2048, // Key size in bits
+      publicKeyEncoding: {
+        type: "spki", // Recommended format for public keys - Subject Public Key Info
+        format: "pem", // PEM format (most common)
+      },
+      privateKeyEncoding: {
+        type: "pkcs8", // Recommended format for private keys - Public-Key Cryptography Standards
+        format: "pem", // PEM format (most common)
+      },
+    });
 
     // Create token pair
     const { token, refreshToken } = await authUtils.createTokenPair(
@@ -45,12 +54,89 @@ class AccessService {
       publicKey,
       privateKey
     );
+
+    // Save refresh token to database
+    const publicKeyString = await KeyTokenService.createKeyToken({
+      userId: userInfo._id,
+      publicKey,
+      privateKey,
+      token,
+      refreshToken,
+    });
+    if (!publicKeyString) {
+      throw new InternalServerError("Failed to save public key");
+    }
+
     return { token, refreshToken };
   }
 
   static async logout({ keyStore }) {
     const delKey = await KeyTokenService.removeKeyById(keyStore);
-    return delKey;
+    return getObjectInformation(
+      ["_id", "token", "refreshToken", "createdAt"],
+      delKey
+    );
+  }
+
+  static async refresh({ refreshToken }) {
+    // 1. Find key by used refresh token => Prevent replay attack
+    var foundKey = await KeyTokenService.findKeyByUsedRefreshToken(
+      refreshToken
+    );
+
+    // 2. If keyStore found, verify refresh token => To check who is try to sabotage the system with refresh token
+    if (foundKey) {
+      const { _id: userId, email } = JWT.verify(
+        refreshToken,
+        foundKey.publicKey
+      );
+      log(`Refresh Token forbidden :: userId: ${userId}`);
+      log(`Refresh Token forbidden :: email: ${email}`);
+
+      // 3. If user found, delete all key from database => Attack detected
+      await KeyTokenService.removeKeyByUserId(userId);
+      throw new ForbiddenError("You are not allowed to use this refresh token");
+    }
+
+    // 4. Find key store by refresh token
+    var keyStore = await KeyTokenService.findKeyByRefreshToken(refreshToken);
+    if (!keyStore) {
+      throw new NotFoundError("Key not found");
+    }
+
+    // 5. Verify refresh token
+    const { _id: userId, email } = JWT.verify(refreshToken, keyStore.publicKey);
+    log(`Refresh Token :: userId: ${userId}`);
+    log(`Refresh Token :: email: ${email}`);
+
+    // 6. Find user by userId
+    const userInfo = await shopModel.findById(userId).lean().exec();
+    if (!userInfo) {
+      throw new NotFoundError("User not found");
+    }
+
+    // 7. Create new tokens pair
+    const tokens = await authUtils.createTokenPair(
+      getObjectInformation(["_id", "email", "name"], userInfo),
+      keyStore.publicKey,
+      keyStore.privateKey
+    );
+
+    // 8. Save new refresh token to database
+    await keyStore.updateOne({
+      $set: { refreshToken: tokens.refreshToken },
+      $set: { token: tokens.token },
+      $addToSet: { refreshTokensUsed: refreshToken },
+    });
+
+    return {
+      user: {
+        _id: userInfo._id,
+        email: userInfo.email,
+        name: userInfo.name,
+      },
+      tokens,
+    };
   }
 
   // Register a new User
@@ -104,21 +190,24 @@ class AccessService {
       // log(`publicKey: ${publicKey}`);
       // log(`privateKey: ${privateKey}`);
 
-      // Save public key to database
-      const publicKeyString = await KeyTokenService.createKeyToken({
-        userId: newShop._id,
-        publicKey,
-        privateKey,
-      });
-      if (!publicKeyString) {
-        throw new InternalServerError("Failed to save public key");
-      }
-
+      // Create token pair
       const { token, refreshToken } = await authUtils.createTokenPair(
         getObjectInformation(["_id", "email", "name"], newShop),
         publicKey,
         privateKey
       );
+
+      // Save key to database
+      const publicKeyString = await KeyTokenService.createKeyToken({
+        userId: newShop._id,
+        publicKey,
+        privateKey,
+        token,
+        refreshToken,
+      });
+      if (!publicKeyString) {
+        throw new InternalServerError("Failed to save public key");
+      }
 
       log(`token: ${token}`);
       log(`refreshToken: ${refreshToken}`);

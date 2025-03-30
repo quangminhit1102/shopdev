@@ -44,11 +44,11 @@ const authenticate = async (req, res, next) => {
   if (!token) throw new AuthFailureError("Unauthorized");
 
   // find key by userId
-  var key = await KeyTokenService.findKeyByUserId(userId);
+  var key = await KeyTokenService.findKeyByUserIdAndToken(userId, token);
   if (!key) throw new NotFoundError("Key not found");
 
   // verify token
-  const decoded = JWT.verify(token, key.publicKey, (err, user) => {
+  await JWT.verify(token, key.publicKey, (err, user) => {
     if (err) throw new AuthFailureError(err.message);
     req.keyStore = key;
     console.log("Decoded user:", user);
