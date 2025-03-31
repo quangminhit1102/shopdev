@@ -1,4 +1,4 @@
-# Design Patterns
+# Design Patterns In JS
 
 Design patterns are reusable solutions to common programming problems. They provide templates for how to solve problems that can be used in many different situations. This guide covers the most commonly used design patterns organized by type, with JavaScript examples.
 
