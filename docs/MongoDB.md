@@ -1,4 +1,4 @@
-# MongoDB - Limits and Important Considerations
+# MongoDB Notes
 
 ## 1. Maximum Number of Documents in a Collection
 
