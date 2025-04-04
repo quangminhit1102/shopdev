@@ -52,36 +52,45 @@ const productSchema = new Schema(
 // Clothing, Electronics, Furniture
 const clothingSchema = new Schema({
   brand: {
+    required: true,
     type: String,
   },
   size: {
+    required: true,
     type: String,
   },
   material: {
+    required: true,
     type: String,
   },
 });
 
 const electronicsSchema = new Schema({
   brand: {
+    required: true,
     type: String,
   },
   model: {
+    required: true,
     type: String,
   },
   warranty: {
+    required: true,
     type: Number,
   },
 });
 
 const furnitureSchema = new Schema({
   brand: {
+    required: true,
     type: String,
   },
   material: {
+    required: true,
     type: String,
   },
   dimensions: {
+    required: true,
     type: String,
   },
 });
