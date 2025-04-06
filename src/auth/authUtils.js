@@ -5,11 +5,13 @@ const KeyTokenService = require("../services/keyToken.service");
 const { NotFoundError, AuthFailureError } = require("../core/error.response");
 const { Network } = require("inspector/promises");
 const { log } = require("console");
+const { asyncHandler } = require("../helpers/asyncHandler");
 
 const HEADER = {
   API_KEY: "x-api-key",
   CLIENT_ID: "x-client-id",
   AUTHORIZATION: "authorization",
+  REFRESH_TOKEN: "x-refresh-token",
 };
 
 const createTokenPair = async (payload, publicKey, privateKey) => {
@@ -36,7 +38,7 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
   return { token, refreshToken };
 };
 
-const authenticate = async (req, res, next) => {
+const authenticate = asyncHandler(async (req, res, next) => {
   const token = req.headers[HEADER.AUTHORIZATION];
   const userId = req.headers[HEADER.CLIENT_ID];
 
@@ -54,6 +56,44 @@ const authenticate = async (req, res, next) => {
     console.log("Decoded user:", user);
     next();
   });
-};
+});
 
-module.exports = { createTokenPair, authenticate };
+const authenticateV2 = asyncHandler(async (req, res, next) => {
+  // 1. check client id
+  const userId = req.headers[HEADER.CLIENT_ID];
+  if (!userId) throw new AuthFailureError("Unauthorized");
+
+  // 2. find key by userId
+  var keyStore = await KeyTokenService.findByUserId(userId);
+  if (!keyStore) throw new NotFoundError("Key not found");
+
+  // 3. check refresh token
+  const refreshToken = req.headers[HEADER.REFRESH_TOKEN];
+  if (refreshToken) {
+    try {
+      const decoded = JWT.verify(refreshToken, keyStore.privateKey);
+      if (decoded.userId !== userId) {
+        throw new AuthFailureError("Invalid refresh token");
+      }
+      req.keyStore = keyStore;
+      req.user = decoded;
+      req.refreshToken = refreshToken;
+      return next();
+    } catch (err) {
+      throw new AuthFailureError("Invalid refresh token");
+    }
+  }
+
+  // 4. check access token
+  const token = req.headers[HEADER.AUTHORIZATION];
+  if (!token) throw new AuthFailureError("Unauthorized");
+  // verify token
+  await JWT.verify(token, keyStore.publicKey, (err, user) => {
+    if (err) throw new AuthFailureError(err.message);
+    req.keyStore = keyStore;
+    console.log("Decoded user:", user);
+    next();
+  });
+});
+
+module.exports = { createTokenPair, authenticate, authenticateV2 };

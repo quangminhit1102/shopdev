@@ -25,6 +25,16 @@ class KeyTokenService {
     }
   };
 
+  static findByUserId = async (userId) => {
+    try {
+      return await KeyTokenModel.findOne({
+        userId: Types.ObjectId.createFromHexString(userId),
+      }).lean();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   static findKeyByUserIdAndToken = async (userId, token) => {
     try {
       return await KeyTokenModel.findOne({
