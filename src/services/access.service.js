@@ -139,6 +139,14 @@ class AccessService {
     };
   }
 
+  static async refreshV2({ keyStore, user, refreshToken }) {
+    // 1. Find key by used refresh token => Prevent replay attack => Delete all key from database
+    // 2. Check refresh token is valid foundKey.refreshToken = refreshToken
+    // 3. Find shop if not found => throw AuthFailureError
+    // 4. Create new tokens pair
+    // 5. Update new refresh token to database
+  }
+
   // Register a new User
   static async register({ name, email, password }) {
     // Hash password

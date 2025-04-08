@@ -11,14 +11,36 @@ class KeyTokenService {
     refreshToken,
   }) => {
     try {
+      // Version 1
+      // const publicKeyString = publicKey.toString();
+      // const tokens = await KeyTokenModel.create(
+      //   {
+      //     userId: userId,
+      //     publicKey: publicKeyString,
+      //     privateKey: privateKey,
+      //     token: token,
+      //     refreshToken: refreshToken,
+      //   },
+      //   (options = { upsert: true, new: true })
+      //   // upsert: true will create a new document if no document matches the query criteria
+      //   // new: true will return the modified document rather than the original
+      // );
+
+      // Version 2
       const publicKeyString = publicKey.toString();
-      const tokens = await KeyTokenModel.create({
-        userId: userId,
-        publicKey: publicKeyString,
-        privateKey: privateKey,
-        token: token,
-        refreshToken: refreshToken,
-      });
+      const filter = { userId: userId },
+        update = {
+          publicKey: publicKeyString,
+          privateKey: privateKey,
+          token: token,
+          refreshToken: refreshToken,
+        },
+        option = { upsert: true, new: true };
+      const tokens = await KeyTokenModel.findOneAndUpdate(
+        filter,
+        update,
+        option
+      );
       return tokens ? userId : null;
     } catch (error) {
       throw error;
