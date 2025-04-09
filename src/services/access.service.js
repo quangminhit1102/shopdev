@@ -13,6 +13,7 @@ const {
   InternalServerError,
   NotFoundError,
   ForbiddenError,
+  AuthFailureError,
 } = require("../core/error.response");
 const { CREATED, OK } = require("../core/success.response");
 
@@ -140,11 +141,36 @@ class AccessService {
   }
 
   static async refreshV2({ keyStore, user, refreshToken }) {
+    const { userId, email } = user;
     // 1. Find key by used refresh token => Prevent replay attack => Delete all key from database
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+      log(`Refresh Token forbidden :: userId: ${userId}`);
+      log(`Refresh Token forbidden :: email: ${email}`);
+      await KeyTokenService.removeKeyByUserId(userId);
+      throw new ForbiddenError("You are not allowed to use this refresh token");
+    }
+
     // 2. Check refresh token is valid foundKey.refreshToken = refreshToken
+    if (keyStore.refreshToken !== refreshToken) {
+      log(`Refresh Token forbidden :: userId: ${userId}`);
+      log(`Refresh Token forbidden :: email: ${email}`);
+      throw new AuthFailureError("Invalid refresh token");
+    }
+
     // 3. Find shop if not found => throw AuthFailureError
+    const foundShop = await shopModel.findById(userId).lean().exec();
+    if (!foundShop) throw new AuthFailureError("Shop not found");
+
     // 4. Create new tokens pair
+    const tokens = await authUtils.createTokenPair(
+      getObjectInformation(["_id", "email", "name"], foundShop)
+    );
+
     // 5. Update new refresh token to database
+    await keyStore.update({
+      $set: { refreshToken: tokens.refreshToken }, // $Set: to update the property value
+      $addToSet: { refreshTokensUsed: refreshToken }, // $addToSet: to add the refresh token to the array of used refresh tokens
+    });
   }
 
   // Register a new User
