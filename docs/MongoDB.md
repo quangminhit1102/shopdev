@@ -46,16 +46,16 @@
   "_id": 1,
   "name": "John Doe",
   "address": {
-    "street": "123 Main St",
-    "city": "New York",
+    "street": "123 linh xuan",
+    "city": "HCM",
     "location": {
       "latitude": 40.7128,
       "longitude": -74.006,
       "details": {
         "region": "East Coast",
         "country": {
-          "name": "USA",
-          "code": "US"
+          "name": "VIET NAM",
+          "code": "VN"
         }
       }
     }
