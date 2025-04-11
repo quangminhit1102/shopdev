@@ -141,7 +141,8 @@ class AccessService {
   }
 
   static async refreshV2({ keyStore, user, refreshToken }) {
-    const { userId, email } = user;
+    const { _id: userId, email } = user;
+
     // 1. Find key by used refresh token => Prevent replay attack => Delete all key from database
     if (keyStore.refreshTokensUsed.includes(refreshToken)) {
       log(`Refresh Token forbidden :: userId: ${userId}`);
@@ -163,14 +164,37 @@ class AccessService {
 
     // 4. Create new tokens pair
     const tokens = await authUtils.createTokenPair(
-      getObjectInformation(["_id", "email", "name"], foundShop)
+      getObjectInformation(["_id", "email", "name"], foundShop),
+      keyStore.publicKey,
+      keyStore.privateKey
     );
 
     // 5. Update new refresh token to database
-    await keyStore.update({
-      $set: { refreshToken: tokens.refreshToken }, // $Set: to update the property value
-      $addToSet: { refreshTokensUsed: refreshToken }, // $addToSet: to add the refresh token to the array of used refresh tokens
-    });
+    // await keyStore.updateOne({
+    //   $set: { refreshToken: tokens.refreshToken },
+    //   $set: { token: tokens.token },
+    //   $addToSet: { refreshTokensUsed: refreshToken },
+    // });
+
+    await keyTokenModel.updateOne(
+      { _id: keyStore._id },
+      {
+        $set: {
+          refreshToken: tokens.refreshToken,
+          token: tokens.token,
+        },
+        $addToSet: { refreshTokensUsed: refreshToken },
+      }
+    );
+
+    return {
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+      tokens,
+    };
   }
 
   // Register a new User

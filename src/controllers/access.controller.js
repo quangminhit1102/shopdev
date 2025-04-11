@@ -28,7 +28,11 @@ class AccessController {
   static async refresh(req, res, next) {
     new OK({
       message: "refresh token successfully",
-      metadata: await AccessService.refresh(req.body),
+      metadata: await AccessService.refreshV2({
+        keyStore: req.keyStore,
+        refreshToken: req.headers["x-refresh-token"],
+        user: req.user,
+      }),
     }).send(res);
   }
 
