@@ -162,19 +162,20 @@ class ProductStrategy {
   // This method allows you to create a product of a specific type
   static async createProduct(payload) {
     const { product_type } = payload;
-    const ProductClass = ProductStrategy.productRegistry[product_type];
+    const ProductClass =
+      ProductStrategy.productRegistry[product_type.toUpperCase()];
     if (!ProductClass) {
-      throw new Error(`Product type ${product_type} not registered`);
+      throw new BadRequestError("Invalid product type");
     }
-    const productInstance = new ProductClass(payload);
-    return await productInstance.createProduct();
+
+    return new ProductClass(payload).createProduct();
   }
 }
 
 // Register product types with their respective classes
-ProductStrategy.registerProductType("CLOTHING", ClothingModel);
-ProductStrategy.registerProductType("FURNITURE", FurnitureModel);
-ProductStrategy.registerProductType("ELECTRONICS", ElectronicModel);
+ProductStrategy.registerProductType("CLOTHING", Clothing);
+ProductStrategy.registerProductType("FURNITURE", Furniture);
+ProductStrategy.registerProductType("ELECTRONICS", Electronic);
 
 // Export the classes and the factory
 module.exports = {

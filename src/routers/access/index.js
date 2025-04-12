@@ -3,7 +3,7 @@
 const express = require("express");
 const AccessController = require("../../controllers/access.controller");
 const { asyncHandler } = require("../../helpers/asyncHandler");
-const { authenticate, authenticateV2 } = require("../../auth/authUtils");
+const { authenticateV2 } = require("../../auth/authUtils");
 const router = express.Router();
 
 router.post("/login", asyncHandler(AccessController.login));
