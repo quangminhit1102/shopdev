@@ -47,7 +47,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
 
   // find key by userId
   var key = await KeyTokenService.findKeyByUserIdAndToken(userId, token);
-  if (!key) throw new NotFoundError("Key not found");
+  if (!key) throw new AuthFailureError("Unauthorized");
 
   // verify token
   await JWT.verify(token, key.publicKey, (err, user) => {
@@ -66,7 +66,7 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
   // 2. find key by userId
   var keyStore = await KeyTokenService.findByUserId(userId);
   log("Key store:", keyStore);
-  if (!keyStore) throw new NotFoundError("Key not found");
+  if (!keyStore) throw new AuthFailureError("Unauthorized");
 
   // 3. check refresh token
   const refreshToken = req.headers[HEADER.REFRESH_TOKEN];

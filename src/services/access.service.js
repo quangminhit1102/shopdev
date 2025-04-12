@@ -102,7 +102,7 @@ class AccessService {
     // 4. Find key store by refresh token
     var keyStore = await KeyTokenService.findKeyByRefreshToken(refreshToken);
     if (!keyStore) {
-      throw new NotFoundError("Key not found");
+      throw new AuthFailureError("Unauthorized");
     }
 
     // 5. Verify refresh token
