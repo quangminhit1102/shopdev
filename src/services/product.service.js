@@ -8,6 +8,13 @@ const {
   Electronics: ElectronicModel,
 } = require("../models/product.model");
 
+const {
+  publishProduct,
+  findAllDraftProductsOfShop,
+  findAllPublishedProductsOfShop,
+  unPublicProduct,
+} = require("../models/repositories/product.repo");
+
 // -------------------------------------------------------
 // Factory Pattern for Product Creation
 // -------------------------------------------------------
@@ -87,6 +94,44 @@ class Product {
       "shop_name"
     );
   }
+
+  //// PUT
+  // publish a product
+  static async publishProduct({ product_shop, product_id }) {
+    return await publishProduct({ product_shop, product_id });
+  }
+
+  // unpublish a product
+  static async unPublicProduct({ product_shop, product_id }) {
+    return await unPublicProduct({ product_shop, product_id });
+  }
+  //// End PUT
+
+  //// Query
+  // Get all products of a shop with pagination
+  static async findAllDraftProductsOfShop({
+    product_shop,
+    limit = 50,
+    skip = 0,
+  }) {
+    return await ProductModel.find({ product_shop, isDraft: true })
+      .limit(limit)
+      .skip(skip)
+      .populate("product_shop", "shop_name");
+  }
+
+  // Get all published products of a shop with pagination
+  static async findAllPublishedProductsOfShop({
+    product_shop,
+    limit = 50,
+    skip = 0,
+  }) {
+    return await ProductModel.find({ product_shop, isPublished: true })
+      .limit(limit)
+      .skip(skip)
+      .populate("product_shop", "shop_name");
+  }
+  //// End Query
 }
 
 class Clothing extends Product {
