@@ -18,7 +18,7 @@ Encryption is essential for secure data transmission. Here's a comparison betwee
 
 ## Visual Comparison
 
-![alt text](symmetric-and-asymmetric-key-1-2.webp)
+![alt text](./Images/symmetric-and-asymmetric-key-1-2.webp)
 
 ## Key Differences
 
