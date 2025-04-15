@@ -5,9 +5,9 @@ const morgan = require("morgan");
 const { default: helmet } = require("helmet");
 const compression = require("compression");
 
-// parse application/json
+// Parse application/json
 app.use(express.json());
-// parse application/x-www-form-urlencoded
+// Parse application/x-www-form-urlencoded
 // Extended allows for rich objects and arrays to be encoded into the URL-encoded format
 app.use(express.urlencoded({ extended: true }));
 
