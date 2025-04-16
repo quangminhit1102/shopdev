@@ -1,5 +1,16 @@
 "use strict";
 
+/**
+ * @description This module defines custom error classes for different HTTP status codes and their corresponding messages.
+ * @module error.response
+ * @requires Error
+ * @exports ConflictRequestError
+ * @exports BadRequestError
+ * @exports AuthFailureError
+ * @exports NotFoundError
+ * @exports ForbiddenError
+ * @exports InternalServerError
+ */
 const StatusCode = {
   FORBIDDEN: 403,
   CONFLICT: 409,
@@ -9,6 +20,17 @@ const StatusCode = {
   INTERNAL_SERVER: 500,
 };
 
+/**
+ * @description This object contains the default error messages for different HTTP status codes.
+ * @constant
+ * @type {Object}
+ * @property {string} FORBIDDEN - The default message for Forbidden errors.
+ * @property {string} CONFLICT - The default message for Conflict errors.
+ * @property {string} UNAUTHORIZED - The default message for Unauthorized errors.
+ * @property {string} NOT_FOUND - The default message for Not Found errors.
+ * @property {string} BAD_REQUEST - The default message for Bad Request errors.
+ * @property {string} INTERNAL_SERVER - The default message for Internal Server errors.
+ */
 const ReasonStatusCode = {
   FORBIDDEN: "Bad request error",
   CONFLICT: "Conflict error",
@@ -18,6 +40,13 @@ const ReasonStatusCode = {
   INTERNAL_SERVER: "Internal Server Error",
 };
 
+/**
+ * @class ErrorResponse
+ * @extends Error
+ * @description Base class for all error responses.
+ * @param {string} message - The error message.
+ * @param {number} status - The HTTP status code.
+ */
 class ErrorResponse extends Error {
   constructor(message, status) {
     super(message);
@@ -25,6 +54,13 @@ class ErrorResponse extends Error {
   }
 }
 
+/**
+ * @class ConflictRequestError
+ * @extends ErrorResponse
+ * @description Class for handling conflict request errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class ConflictRequestError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.CONFLICT,
@@ -34,6 +70,13 @@ class ConflictRequestError extends ErrorResponse {
   }
 }
 
+/**
+ * @class BadRequestError
+ * @extends ErrorResponse
+ * @description Class for handling bad request errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class BadRequestError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.BAD_REQUEST,
@@ -42,7 +85,13 @@ class BadRequestError extends ErrorResponse {
     super(message, statusCode);
   }
 }
-
+/**
+ * @class AuthFailureError
+ * @extends ErrorResponse
+ * @description Class for handling authentication failure errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class AuthFailureError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.UNAUTHORIZED,
@@ -52,6 +101,13 @@ class AuthFailureError extends ErrorResponse {
   }
 }
 
+/**
+ * @class NotFoundError
+ * @extends ErrorResponse
+ * @description Class for handling not found errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class NotFoundError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.NOT_FOUND,
@@ -61,6 +117,13 @@ class NotFoundError extends ErrorResponse {
   }
 }
 
+/**
+ * @class ForbiddenError
+ * @extends ErrorResponse
+ * @description Class for handling forbidden errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class ForbiddenError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.FORBIDDEN,
@@ -70,6 +133,13 @@ class ForbiddenError extends ErrorResponse {
   }
 }
 
+/**
+ * @class InternalServerError
+ * @extends ErrorResponse
+ * @description Class for handling internal server errors.
+ * @param {string} message - The error message.
+ * @param {number} statusCode - The HTTP status code.
+ */
 class InternalServerError extends ErrorResponse {
   constructor(
     message = ReasonStatusCode.INTERNAL_SERVER,

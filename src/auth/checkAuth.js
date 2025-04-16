@@ -1,7 +1,6 @@
 "use strict";
 
 const { error, log } = require("console");
-const apiKeyModel = require("../models/apiKey.model");
 const { findAPIKey } = require("../services/apiKey.service");
 // const crypto = require("crypto");
 
@@ -12,6 +11,7 @@ const HEADER = {
 
 const apiKey = async (req, res, next) => {
   try {
+    
     // await apiKeyModel.create({
     //   Key: crypto.randomBytes(64).toString("hex"),
     //   type: "admin",
