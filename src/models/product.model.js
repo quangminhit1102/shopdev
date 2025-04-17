@@ -3,6 +3,7 @@
 const DOCUMENT_NAME = "Product";
 const COLLECTION_NAME = "Products";
 
+const { set } = require("lodash");
 const { Schema, model } = require("mongoose");
 
 const ProductType = {
@@ -21,6 +22,9 @@ const productSchema = new Schema(
       type: String,
     },
     product_description: {
+      type: String,
+    },
+    product_slug: {
       type: String,
     },
     product_price: {
@@ -44,9 +48,53 @@ const productSchema = new Schema(
       type: Schema.Types.Mixed,
       required: true,
     },
+    // product_ratings
+    product_ratingsAvg: {
+      type: Number,
+      default: 4.5,
+      min: [1, "Rating must be at least 1"],
+      max: [5, "Rating must be at most 5"],
+      set: (value) => {
+        return Math.round(value * 10) / 10; // Round to one decimal place
+      },
+    },
+    product_variations: { type: Array, default: [] },
+    // draft and published
+    isDraft: {
+      type: Boolean,
+      default: true,
+      index: true,
+      select: false,
+    },
+    isPublished: {
+      type: Boolean,
+      default: false,
+      index: true,
+      select: false,
+    },
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );
+
+// Add a slug before saving the product
+// productSchema.pre("save", function (next) {
+//   if (this.isModified("product_name")) {
+//     this.product_slug = this.product_name.toLowerCase().replace(/ /g, "-");
+//   }
+//   next();
+// });
+
+// using slugify to create a slug from the product name
+const slugify = require("slugify");
+productSchema.pre("save", function (next) {
+  if (this.isModified("product_name")) {
+    this.product_slug = slugify(this.product_name, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
+});
 
 // Define the product types
 // Clothing, Electronics, Furniture
