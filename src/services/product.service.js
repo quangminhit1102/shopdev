@@ -134,6 +134,7 @@ class Product {
   //// End Query
 }
 
+// Create a new product of type Clothing
 class Clothing extends Product {
   constructor(productData) {
     super(productData);
@@ -156,6 +157,7 @@ class Clothing extends Product {
   }
 }
 
+// Create a new product of type Furniture
 class Furniture extends Product {
   async createProduct() {
     const newFurniture = await FurnitureModel.create({
@@ -174,6 +176,7 @@ class Furniture extends Product {
   }
 }
 
+// Create a new product of type Electronics
 class Electronic extends Product {
   async createProduct() {
     const newElectronics = await ElectronicModel.create({
