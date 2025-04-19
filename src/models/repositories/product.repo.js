@@ -7,7 +7,6 @@ const {
   Clothing,
   Furniture,
 } = require("../product.model");
-const { search } = require("../../routers");
 
 // Query product with pagination
 const queryProduct = async ({ query, limit, skip }) => {
