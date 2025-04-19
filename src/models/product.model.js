@@ -63,14 +63,14 @@ const productSchema = new Schema(
     isDraft: {
       type: Boolean,
       default: true,
-      index: true,
-      select: false,
+      index: true, // Create an index for faster queries
+      select: false, // Do not include in queries by default
     },
     isPublished: {
       type: Boolean,
       default: false,
-      index: true,
-      select: false,
+      index: true, // Create an index for faster queries
+      select: false, // Do not include in queries by default
     },
   },
   { timestamps: true, collection: COLLECTION_NAME }
@@ -86,11 +86,13 @@ const productSchema = new Schema(
 
 // using slugify to create a slug from the product name
 const slugify = require("slugify");
+// Add a slug before saving the product
 productSchema.pre("save", function (next) {
+  // Check if the product_name field has been modified
   if (this.isModified("product_name")) {
     this.product_slug = slugify(this.product_name, {
-      lower: true,
-      strict: true,
+      lower: true, // Convert to lower case
+      strict: true, // Remove special characters
     });
   }
   next();
