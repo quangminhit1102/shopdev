@@ -75,17 +75,19 @@ const unPublishProduct = async ({ product_shop, product_id }) => {
   return modifiedCount > 0 ? foundShop : null;
 };
 
-const searchProduct = async ({ product_name, limit, skip }) => {
-  const foundProducts = await Product.find({
-    product_name: { $regex: product_name, $options: "i" },
-  })
-    .limit(limit)
-    .skip(skip)
-    .populate("product_shop", "name email -_id")
-    .lean()
-    .exec();
+const searchProducts = async ({ keySearch, limit, skip }) => {
+  const regexSearch = new RegExp(keySearch);
+  const result = await Product.find(
+    {
+      isPublished: true,
+      $text: { $search: regexSearch }, // Use $text for full-text search
+    },
+    { score: { $meta: "textScore" } } // Include score in the projection
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .lean();
 
-  return foundProducts;
+  return result.length > 0 ? result : null;
 };
 
 // Export functions
@@ -94,5 +96,5 @@ module.exports = {
   findAllPublishedProductsOfShop,
   publishProduct,
   unPublishProduct,
-  searchProduct,
+  searchProducts,
 };

@@ -76,6 +76,9 @@ const productSchema = new Schema(
   { timestamps: true, collection: COLLECTION_NAME }
 );
 
+// Create a text index for full-text search for product_name and product_description
+productSchema.index({ product_name: "text", product_description: "text" });
+
 // Add a slug before saving the product
 // productSchema.pre("save", function (next) {
 //   if (this.isModified("product_name")) {

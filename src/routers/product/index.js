@@ -30,4 +30,6 @@ router.get(
   asyncHandler(ProductController.findAllPublishedProductsOfShop)
 );
 
+router.get("/search", asyncHandler(ProductController.searchProducts));
+
 module.exports = router;

@@ -19,7 +19,7 @@ class ProductController {
   };
 
   publishProduct = async (req, res) => {
-    new CREATED({
+    new OK({
       message: "Product published successfully!",
       metadata: await ProductStrategy.publishProduct({
         product_shop: req.user?._id,
@@ -29,7 +29,7 @@ class ProductController {
   };
 
   unPublishProduct = async (req, res) => {
-    new CREATED({
+    new OK({
       message: "Product unpublished successfully!",
       metadata: await ProductStrategy.unPublishProduct({
         product_shop: req.user?._id,
@@ -48,7 +48,7 @@ class ProductController {
   };
 
   findAllPublishedProductsOfShop = async (req, res) => {
-    new CREATED({
+    new OK({
       message: "Published products retrieved successfully!",
       metadata: await ProductStrategy.findAllPublishedProductsOfShop({
         product_shop: req.user?._id,
@@ -57,9 +57,13 @@ class ProductController {
   };
 
   searchProducts = async (req, res) => {
-    new CREATED({
+    new OK({
       message: "Products retrieved successfully!",
-      metadata: await ProductStrategy.searchProducts(req.body),
+      metadata: await ProductStrategy.searchProducts({
+        keySearch: req.query.keySearch,
+        limit: req.query.limit,
+        skip: req.query.skip,
+      }),
     }).send(res);
   };
 }

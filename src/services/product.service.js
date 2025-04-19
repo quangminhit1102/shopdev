@@ -1,5 +1,6 @@
 "use strict";
 
+const { find } = require("lodash");
 const { InternalServerError } = require("../core/error.response");
 const {
   Product: ProductModel,
@@ -13,6 +14,7 @@ const {
   findAllDraftProductsOfShop,
   findAllPublishedProductsOfShop,
   unPublishProduct,
+  searchProducts,
 } = require("../models/repositories/product.repo");
 
 // -------------------------------------------------------
@@ -214,11 +216,22 @@ class ProductStrategy {
     limit = 50,
     skip = 0,
   }) {
-    return await ProductModel.find({ product_shop, isPublished: true })
-      .limit(limit)
-      .skip(skip)
-      .populate("product_shop", "shop_name");
+    const query = { product_shop, isPublished: true };
+    return await findAllPublishedProductsOfShop({
+      query,
+      limit,
+      skip,
+    });
   }
+
+  static async searchProducts({ keySearch, limit = 50, skip = 0 }) {
+    return await searchProducts({
+      keySearch: keySearch,
+      limit,
+      skip,
+    });
+  }
+
   //// End Query
 }
 
