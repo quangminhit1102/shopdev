@@ -31,7 +31,10 @@ class ProductController {
   unPublishProduct = async (req, res) => {
     new CREATED({
       message: "Product unpublished successfully!",
-      metadata: await ProductStrategy.unPublishProduct(req.body),
+      metadata: await ProductStrategy.unPublishProduct({
+        product_shop: req.user?._id,
+        product_id: req.params.product_id,
+      }),
     }).send(res);
   };
 

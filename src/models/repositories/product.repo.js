@@ -55,7 +55,7 @@ const publishProduct = async ({ product_shop, product_id }) => {
   return modifiedCount > 0 ? foundShop : null;
 };
 
-const unPublicProduct = async ({ product_shop, product_id }) => {
+const unPublishProduct = async ({ product_shop, product_id }) => {
   const foundShop = await Product.findOne({
     product_shop: new Types.ObjectId(product_shop),
     _id: new Types.ObjectId(product_id),
@@ -93,6 +93,6 @@ module.exports = {
   findAllDraftProductsOfShop,
   findAllPublishedProductsOfShop,
   publishProduct,
-  unPublicProduct,
+  unPublishProduct,
   searchProduct,
 };

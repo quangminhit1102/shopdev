@@ -12,7 +12,7 @@ const {
   publishProduct,
   findAllDraftProductsOfShop,
   findAllPublishedProductsOfShop,
-  unPublicProduct,
+  unPublishProduct,
 } = require("../models/repositories/product.repo");
 
 // -------------------------------------------------------
@@ -188,8 +188,8 @@ class ProductStrategy {
   }
 
   // unpublish a product
-  static async unPublicProduct({ product_shop, product_id }) {
-    return await unPublicProduct({ product_shop, product_id });
+  static async unPublishProduct({ product_shop, product_id }) {
+    return await unPublishProduct({ product_shop, product_id });
   }
   //// End PUT
 
