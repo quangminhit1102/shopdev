@@ -92,7 +92,8 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
   await JWT.verify(token, keyStore.publicKey, (err, user) => {
     if (err) throw new AuthFailureError(err.message);
     req.keyStore = keyStore;
-    console.log("Decoded user:", user);
+    req.user = user;
+    // console.log("Decoded user:", user);
     next();
   });
 });

@@ -10,13 +10,11 @@ const {
 
 // Query product with pagination
 const queryProduct = async ({ query, limit, skip }) => {
-  return await productModel
-    .find(query)
+  return await Product.find(query)
     .limit(limit)
     .skip(skip)
     .populate("product_shop", "name email -_id")
-    .lean()
-    .exec();
+    .lean();
 };
 
 // Find all products of a shop with pagination
@@ -37,10 +35,10 @@ const findAllPublishedProductsOfShop = async ({ query, limit, skip }) => {
   });
 };
 
-const publicProduct = async ({ product_shop, product_id }) => {
+const publishProduct = async ({ product_shop, product_id }) => {
   const foundShop = await Product.findOne({
-    product_shop: Types.ObjectId.createFromString(product_shop),
-    _id: Types.ObjectId.createFromString(product_id),
+    product_shop: new Types.ObjectId(product_shop),
+    _id: new Types.ObjectId(product_id),
   })
     .lean()
     .exec();
@@ -59,8 +57,8 @@ const publicProduct = async ({ product_shop, product_id }) => {
 
 const unPublicProduct = async ({ product_shop, product_id }) => {
   const foundShop = await Product.findOne({
-    product_shop: Types.ObjectId.createFromString(product_shop),
-    _id: Types.ObjectId.createFromString(product_id),
+    product_shop: new Types.ObjectId(product_shop),
+    _id: new Types.ObjectId(product_id),
   })
     .lean()
     .exec();
@@ -94,7 +92,7 @@ const searchProduct = async ({ product_name, limit, skip }) => {
 module.exports = {
   findAllDraftProductsOfShop,
   findAllPublishedProductsOfShop,
-  publicProduct,
+  publishProduct,
   unPublicProduct,
   searchProduct,
 };
