@@ -1,27 +1,49 @@
+const Joi = require("joi");
+
+// Validate environment variables
+const envSchema = Joi.object({
+  NODE_ENV: Joi.string()
+    .valid("Development", "Production")
+    .default("Development"),
+  DEV_APP_PORT: Joi.number().default(3000),
+  DEV_DB_HOST: Joi.string().default("localhost"),
+  DEV_DB_PORT: Joi.number().default(27017),
+  DEV_DB_NAME: Joi.string().default("ShopDev"),
+  PRO_APP_PORT: Joi.number().default(3000),
+  PRO_DB_HOST: Joi.string().default("localhost"),
+  PRO_DB_PORT: Joi.number().default(27017),
+  PRO_DB_NAME: Joi.string().default("ShopDev"),
+}).unknown();
+
+const { error, value: envVars } = envSchema.validate(process.env);
+if (error) {
+  throw new Error(`Environment validation error: ${error.message}`);
+}
+
 const Development = {
   app: {
-    port: process.env.DEV_APP_PORT || 3000,
+    port: envVars.DEV_APP_PORT,
   },
   db: {
-    host: process.env.DEV_DB_HOST || "localhost",
-    port: process.env.DEV_DB_PORT || 27017,
-    name: process.env.DEV_DB_NAME || "ShopDev",
+    host: envVars.DEV_DB_HOST,
+    port: envVars.DEV_DB_PORT,
+    name: envVars.DEV_DB_NAME,
   },
 };
 
 const Production = {
   app: {
-    port: process.env.PRO_APP_PORT || 3000,
+    port: envVars.PRO_APP_PORT,
   },
   db: {
-    host: process.env.PRO_DB_HOST || "localhost",
-    port: process.env.PRO_DB_PORT || 27017,
-    name: process.env.PRO_DB_NAME || "ShopDev",
+    host: envVars.PRO_DB_HOST,
+    port: envVars.PRO_DB_PORT,
+    name: envVars.PRO_DB_NAME,
   },
 };
 
 const config = { Development, Production };
-const env = process.env.NODE_ENV || "Development";
+const env = envVars.NODE_ENV;
 
 console.log(config[env]);
 
