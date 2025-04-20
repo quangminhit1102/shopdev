@@ -149,12 +149,16 @@ class InternalServerError extends ErrorResponse {
   }
 }
 
+/**
+ * @class AppError
+ * @extends Error
+ */
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = true;
-    Error.captureStackTrace(this, this.constructor);
+    //Error.captureStackTrace(this, this.constructor); // Capture the stack trace to exclude the constructor call from the stack trace
   }
 }
 

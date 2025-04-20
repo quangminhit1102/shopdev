@@ -1,8 +1,7 @@
+"use strict";
 const mongoose = require("mongoose");
 const os = require("os");
 const process = require("process");
-
-("use strict");
 
 const _SECONDS = 5000;
 
