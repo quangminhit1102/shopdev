@@ -7,6 +7,7 @@ const {
   Clothing,
   Furniture,
 } = require("../product.model");
+const { getSelectData, unGetSelectData } = require("../../utils/index");
 
 // Query product with pagination
 const queryProduct = async ({ query, limit, skip }) => {
@@ -90,6 +91,36 @@ const searchProducts = async ({ keySearch, limit, skip }) => {
   return result.length > 0 ? result : null;
 };
 
+const findAllProducts = async ({
+  limit = 50,
+  sort = "ctime",
+  page = 1,
+  filter = { isPublished: true },
+  select,
+}) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === "ctime" ? { ctime: -1 } : { price: -1 };
+  const products = await Product.find(filter)
+    .limit(limit)
+    .skip(skip)
+    .sort(sortBy)
+    .select(select)
+    .lean()
+    .exec();
+
+  return products.length > 0 ? products : null;
+};
+
+const findProductById = async ({ product_id, unSelect }) => {
+  const product = await Product.findById(product_id)
+    .select(unGetSelectData(unSelect))
+    .lean()
+    .exec();
+  if (!product) return null;
+
+  return product;
+};
+
 // Export functions
 module.exports = {
   findAllDraftProductsOfShop,
@@ -97,4 +128,6 @@ module.exports = {
   publishProduct,
   unPublishProduct,
   searchProducts,
+  findAllProducts,
+  findProductById,
 };
