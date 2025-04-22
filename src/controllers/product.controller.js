@@ -66,6 +66,38 @@ class ProductController {
       }),
     }).send(res);
   };
+
+  // get all products of a shop with pagination
+  findAllProducts = async (req, res) => {
+    new OK({
+      message: "Products retrieved successfully!",
+      metadata: await ProductStrategy.findAllProducts({
+        limit: req.query.limit || 50,
+        sort: req.query.sort || "ctime",
+        page: req.query.page || 1,
+      }),
+    }).send(res);
+  };
+
+  findProductById = async (req, res) => {
+    new OK({
+      message: "Product retrieved successfully!",
+      metadata: await ProductStrategy.findProductById({
+        product_id: req.params.product_id,
+      }),
+    }).send(res);
+  };
+
+  updateProduct = async (req, res) => {
+    new OK({
+      message: "Product updated successfully!",
+      metadata: await ProductStrategy.updateProductById({
+        product_id: req.params.product_id,
+        product_data: req.body,
+        product_shop: req.user?._id,
+      }),
+    }).send(res);
+  };
 }
 
 module.exports = new ProductController();
