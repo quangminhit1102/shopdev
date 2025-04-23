@@ -37,7 +37,9 @@ const unGetSelectData = (select = []) => {
  */
 const removeUndefinedOrNull = (obj) => {
   return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null)
+    Object.entries(obj).filter(
+      ([_, value]) => value !== undefined && value !== null
+    )
   );
 };
 
@@ -47,17 +49,17 @@ const removeUndefinedOrNull = (obj) => {
  * updateNestedObjectParser({ a: { b: 1 }, c: 2 }); // { 'a.b': 1, c: 2 }
  */
 const updateNestedObjectParser = (obj) => {
-  const result = {};
-  for (const key in obj) {
-    if (obj[key] && typeof obj[key] === "object") {
-      for (const subKey in obj[key]) {
-        result[`${key}.${subKey}`] = obj[key][subKey];
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (typeof value === "object" && !Array.isArray(value)) {
+      const nested = updateNestedObjectParser(value);
+      for (const [nestedKey, nestedValue] of Object.entries(nested)) {
+        acc[`${key}.${nestedKey}`] = nestedValue;
       }
     } else {
-      result[key] = obj[key];
+      acc[key] = value;
     }
-  }
-  return result;
+    return acc;
+  }, {});
 };
 
 module.exports = {

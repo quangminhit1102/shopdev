@@ -113,12 +113,12 @@ const findAllProducts = async ({
 
 const updateProductById = async ({
   product_id,
-  productData,
+  product_data,
   model,
   isNew = true,
 }) => {
   return await model
-    .findByIdAndUpdate(product_id, productData, { new: isNew })
+    .findByIdAndUpdate(product_id, product_data, { new: isNew })
     .lean()
     .exec();
 };
