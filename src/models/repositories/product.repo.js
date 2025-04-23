@@ -111,6 +111,18 @@ const findAllProducts = async ({
   return products.length > 0 ? products : null;
 };
 
+const updateProductById = async ({
+  product_id,
+  productData,
+  model,
+  isNew = true,
+}) => {
+  return await model
+    .findByIdAndUpdate(product_id, productData, { new: isNew })
+    .lean()
+    .exec();
+};
+
 const findProductById = async ({ product_id, unSelect }) => {
   const product = await Product.findById(product_id)
     .select(unGetSelectData(unSelect))
@@ -130,4 +142,5 @@ module.exports = {
   searchProducts,
   findAllProducts,
   findProductById,
+  updateProductById,
 };
