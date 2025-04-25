@@ -5,7 +5,7 @@ let DOCUMENT_NAME = "Shop";
 let COLLECTION_NAME = "Shops";
 
 // Declare the Schema of the Mongo model
-var shopSchema = new mongoose.Schema(
+const shopSchema = new mongoose.Schema(
   {
     id: {
       type: mongoose.Schema.Types.ObjectId,

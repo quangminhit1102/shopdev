@@ -4,7 +4,7 @@ let DOCUMENT_NAME = "APIKey";
 let COLLECTION_NAME = "APIKeys";
 
 // Declare the Schema of the Mongo model
-var apiKeySchema = new mongoose.Schema(
+const apiKeySchema = new mongoose.Schema(
   {
     id: {
       type: mongoose.Schema.Types.ObjectId,

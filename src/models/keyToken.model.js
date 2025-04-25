@@ -5,7 +5,7 @@ let COLLECTION_NAME = "Keys";
 const keyTokenModel = require("./keyToken.model");
 
 // Declare the Schema of the Mongo model
-var keyTokenSchema = new mongoose.Schema(
+const keyTokenSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
