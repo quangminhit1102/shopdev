@@ -1,13 +1,15 @@
+// ProductController handles all product-related HTTP requests.
+// Each method corresponds to a specific product operation and delegates to ProductStrategy.
+
 "use strict";
 
-const { model } = require("mongoose");
-const {
-  ProductFactory,
-  ProductStrategy,
-} = require("../services/product.service");
+const { ProductStrategy } = require("../services/product.service");
 const { CREATED, OK } = require("../core/success.response");
 
 class ProductController {
+  /**
+   * Create a new product for the current shop.
+   */
   createProduct = async (req, res) => {
     new CREATED({
       message: "Product created successfully!",
@@ -18,6 +20,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Publish a product by ID for the current shop.
+   */
   publishProduct = async (req, res) => {
     new OK({
       message: "Product published successfully!",
@@ -28,6 +33,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Unpublish a product by ID for the current shop.
+   */
   unPublishProduct = async (req, res) => {
     new OK({
       message: "Product unpublished successfully!",
@@ -38,6 +46,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Get all draft products for the current shop.
+   */
   findAllDraftProductsOfShop = async (req, res) => {
     new OK({
       message: "Draft products retrieved successfully!",
@@ -47,6 +58,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Get all published products for the current shop.
+   */
   findAllPublishedProductsOfShop = async (req, res) => {
     new OK({
       message: "Published products retrieved successfully!",
@@ -56,6 +70,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Search products by keyword, with optional limit and skip for pagination.
+   */
   searchProducts = async (req, res) => {
     new OK({
       message: "Products retrieved successfully!",
@@ -67,7 +84,9 @@ class ProductController {
     }).send(res);
   };
 
-  // get all products of a shop with pagination
+  /**
+   * Get all products with pagination and sorting.
+   */
   findAllProducts = async (req, res) => {
     new OK({
       message: "Products retrieved successfully!",
@@ -79,6 +98,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Get a product by its ID.
+   */
   findProductById = async (req, res) => {
     new OK({
       message: "Product retrieved successfully!",
@@ -88,6 +110,9 @@ class ProductController {
     }).send(res);
   };
 
+  /**
+   * Update a product by its ID for the current shop.
+   */
   updateProduct = async (req, res) => {
     new OK({
       message: "Product updated successfully!",
