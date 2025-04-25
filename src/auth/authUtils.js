@@ -46,7 +46,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
   if (!token) throw new AuthFailureError("Unauthorized");
 
   // find key by userId
-  var key = await KeyTokenService.findKeyByUserIdAndToken(userId, token);
+  let key = await KeyTokenService.findKeyByUserIdAndToken(userId, token);
   if (!key) throw new AuthFailureError("Unauthorized");
 
   // verify token
@@ -64,7 +64,7 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
   if (!userId) throw new AuthFailureError("Unauthorized");
 
   // 2. find key by userId
-  var keyStore = await KeyTokenService.findByUserId(userId);
+  let keyStore = await KeyTokenService.findByUserId(userId);
   log("Key store:", keyStore);
   if (!keyStore) throw new AuthFailureError("Unauthorized");
 
