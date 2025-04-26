@@ -81,7 +81,3 @@ See the `docs/` folder for detailed API documentation, design patterns, and secu
 - `src/middlewares/errorHandler.js`: Centralized error handling
 - `src/services/`: Business logic for access, product, and API key management
 - `src/models/`: Mongoose schemas for all entities
-
-## License
-
-MIT
