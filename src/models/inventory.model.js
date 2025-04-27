@@ -15,8 +15,10 @@ const inventorySchema = new mongoose.Schema(
       default: "Unknown",
     },
     inventory_stock: {
-      type: number,
+      type: Number,
       required: true,
+      min: [1, "Product quantity must be at least 1"],
+      max: [1000, "Product quantity must be at most 1000"],
     },
     inventory_shopId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,4 +36,6 @@ const inventorySchema = new mongoose.Schema(
 );
 
 //Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, inventorySchema);
+module.exports = {
+  InventoryModel: mongoose.model(DOCUMENT_NAME, inventorySchema),
+};

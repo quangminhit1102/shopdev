@@ -15,6 +15,7 @@ const {
   Furniture: FurnitureModel,
   Electronics: ElectronicModel,
 } = require("../models/product.model");
+const { insertInventory } = require("../models/repositories/inventory.repo");
 const productRepo = require("../models/repositories/product.repo");
 const { removeUndefinedOrNull, updateNestedObjectParser } = require("../utils");
 
@@ -60,7 +61,17 @@ class Product {
    * Create a new product (generic)
    */
   async createProduct(product_data) {
-    return ProductModel.create(product_data);
+    const newProduct = await ProductModel.create(product_data);
+    if (newProduct) {
+      // Add product stock inventory for the product
+      await insertInventory({
+        product_id: newProduct._id,
+        shop_id: product_data.product_shop,
+        stock: product_data.product_quantity,
+      });
+    }
+
+    return newProduct;
   }
 
   // Get all products (with shop info)
