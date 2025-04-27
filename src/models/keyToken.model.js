@@ -2,7 +2,6 @@
 const mongoose = require("mongoose");
 let DOCUMENT_NAME = "Key";
 let COLLECTION_NAME = "Keys";
-const keyTokenModel = require("./keyToken.model");
 
 // Declare the Schema of the Mongo model
 const keyTokenSchema = new mongoose.Schema(
