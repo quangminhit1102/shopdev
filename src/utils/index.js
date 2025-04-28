@@ -1,6 +1,18 @@
 "use strict";
 
 const _ = require("lodash");
+const { Types } = require("mongoose");
+
+/**
+ * Converts a string to MongoDB ObjectId
+ * @param {string} id - The string to convert
+ * @returns {ObjectId} MongoDB ObjectId
+ * @example
+ * convertToObjectId('507f1f77bcf86cd799439011')
+ */
+const convertToObjectId = (id) => {
+  return new Types.ObjectId(id);
+};
 
 /**
  * Picks specified fields from an object.
@@ -68,4 +80,5 @@ module.exports = {
   unGetSelectData,
   removeUndefinedOrNull,
   updateNestedObjectParser,
+  convertToObjectId,
 };
