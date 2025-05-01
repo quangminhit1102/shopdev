@@ -4,15 +4,18 @@ const express = require("express");
 const router = express.Router();
 const access = require("./access");
 const product = require("./product");
+const discount = require("./discount");
 
 // Middleware to check API key
 // router.use(require("../auth/checkAuth"));
 
-// product router
+// Product router
 router.use("/shopdev/product", product);
 
 // Access router
 router.use("/shopdev", access);
 
-// Export router
+// Discount router
+router.use("/shopdev/discount", discount);
+
 module.exports = router;
