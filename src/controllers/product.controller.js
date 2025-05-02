@@ -6,9 +6,16 @@
 const { ProductStrategy } = require("../services/product.service");
 const { CREATED, OK } = require("../core/success.response");
 
+/**
+ * Handles all product-related HTTP requests.
+ * Each method delegates to ProductStrategy for business logic.
+ */
 class ProductController {
   /**
    * Create a new product for the current shop.
+   * @route POST /shopdev/product
+   * @param {Request} req
+   * @param {Response} res
    */
   createProduct = async (req, res) => {
     new CREATED({
@@ -22,6 +29,9 @@ class ProductController {
 
   /**
    * Publish a product by ID for the current shop.
+   * @route PATCH /shopdev/product/:product_id/publish
+   * @param {Request} req
+   * @param {Response} res
    */
   publishProduct = async (req, res) => {
     new OK({
@@ -35,6 +45,9 @@ class ProductController {
 
   /**
    * Unpublish a product by ID for the current shop.
+   * @route PATCH /shopdev/product/:product_id/unpublish
+   * @param {Request} req
+   * @param {Response} res
    */
   unPublishProduct = async (req, res) => {
     new OK({
@@ -48,6 +61,9 @@ class ProductController {
 
   /**
    * Get all draft products for the current shop.
+   * @route GET /shopdev/product/drafts
+   * @param {Request} req
+   * @param {Response} res
    */
   findAllDraftProductsOfShop = async (req, res) => {
     new OK({
@@ -60,6 +76,9 @@ class ProductController {
 
   /**
    * Get all published products for the current shop.
+   * @route GET /shopdev/product/published
+   * @param {Request} req
+   * @param {Response} res
    */
   findAllPublishedProductsOfShop = async (req, res) => {
     new OK({
@@ -72,6 +91,9 @@ class ProductController {
 
   /**
    * Search products by keyword, with optional limit and skip for pagination.
+   * @route GET /shopdev/product/search
+   * @param {Request} req
+   * @param {Response} res
    */
   searchProducts = async (req, res) => {
     new OK({
@@ -86,6 +108,9 @@ class ProductController {
 
   /**
    * Get all products with pagination and sorting.
+   * @route GET /shopdev/product
+   * @param {Request} req
+   * @param {Response} res
    */
   findAllProducts = async (req, res) => {
     new OK({
@@ -100,6 +125,9 @@ class ProductController {
 
   /**
    * Get a product by its ID.
+   * @route GET /shopdev/product/:product_id
+   * @param {Request} req
+   * @param {Response} res
    */
   findProductById = async (req, res) => {
     new OK({
@@ -112,6 +140,9 @@ class ProductController {
 
   /**
    * Update a product by its ID for the current shop.
+   * @route PATCH /shopdev/product/:product_id
+   * @param {Request} req
+   * @param {Response} res
    */
   updateProduct = async (req, res) => {
     new OK({

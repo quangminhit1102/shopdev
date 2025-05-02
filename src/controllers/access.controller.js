@@ -6,10 +6,16 @@
 const { CREATED, OK } = require("../core/success.response");
 const AccessService = require("../services/access.service");
 
+/**
+ * Handles user authentication and authorization endpoints.
+ * Each method delegates to the corresponding service for business logic.
+ */
 class AccessController {
   /**
    * Login a user with email and password.
-   * Delegates authentication to AccessService.login.
+   * @route POST /shopdev/login
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
    */
   static async login(req, res, next) {
     new OK({
@@ -20,7 +26,9 @@ class AccessController {
 
   /**
    * Register a new user/shop.
-   * Delegates registration to AccessService.register.
+   * @route POST /shopdev/register
+   * @param {Request} req
+   * @param {Response} res
    */
   static async register(req, res, next) {
     new CREATED({
@@ -31,7 +39,9 @@ class AccessController {
 
   /**
    * Logout the current user by removing their key/token.
-   * Delegates to AccessService.logout.
+   * @route POST /shopdev/logout
+   * @param {Request} req
+   * @param {Response} res
    */
   static async logout(req, res, next) {
     new OK({
@@ -42,7 +52,9 @@ class AccessController {
 
   /**
    * Refresh the authentication token using a refresh token.
-   * Delegates to AccessService.refreshV2.
+   * @route POST /shopdev/refresh
+   * @param {Request} req
+   * @param {Response} res
    */
   static async refresh(req, res, next) {
     new OK({
@@ -57,6 +69,9 @@ class AccessController {
 
   /**
    * Test endpoint to check access (for debugging or health check).
+   * @route GET /shopdev/access
+   * @param {Request} req
+   * @param {Response} res
    */
   static async getAccess(req, res, next) {
     new OK({
