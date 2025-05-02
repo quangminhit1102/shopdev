@@ -19,23 +19,17 @@ class DiscountController {
       message: "Discount code created successfully",
       metadata: await DiscountService.createDiscount({
         ...req.body,
-        shop_id: req.user.id,
+        shop_id: req.user._id,
       }),
     }).send(res);
   }
 
-  /**
-   * Get discount amount for a user/order.
-   * @route POST /v1/api/discount/amount
-   * @param {Request} req
-   * @param {Response} res
-   */
-  static async getDiscountAmount(req, res) {
+  static async getAllProductsByDiscountCode(req, res) {
     new OK({
-      message: "Get discount amount successfully",
-      metadata: await DiscountService.getDiscountAmount({
+      message: "Get all products by discount code successfully",
+      metadata: await DiscountService.getAllProductsByDiscountCode({
         ...req.body,
-        userId: req.user.id,
+        shop_id: req.user._id,
       }),
     }).send(res);
   }

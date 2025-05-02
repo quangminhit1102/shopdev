@@ -2,6 +2,7 @@
 
 const { BadRequestError, NotFoundError } = require("../core/error.response");
 const DiscountModel = require("../models/discount.model");
+const ProductRepository = require("../models/repositories/product.repo");
 const { convertToObjectId } = require("../utils");
 
 /* 
@@ -47,7 +48,8 @@ class DiscountService {
       discount_shopId: convertToObjectId(shop_id),
     });
 
-    if (foundDiscount) {
+    // If found and active, throw an error
+    if (foundDiscount && foundDiscount.discount_is_active) {
       throw new BadRequestError("Discount code already exists");
     }
 
@@ -77,91 +79,43 @@ class DiscountService {
    * @param {Object} payload
    * @returns {Promise<Object>} Discount amount and info
    */
-  static async getDiscountAmount({
-    code,
-    userId,
-    shopId,
-    products,
-    orderValue,
-  }) {
-    const foundDiscount = await DiscountModel.findOne({
+  static async getAllProductsByDiscountCode({ code, shop_id, limit, page }) {
+    // Find discount code
+    const discount = await DiscountModel.findOne({
       discount_code: code,
-      discount_shopId: convertToObjectId(shopId),
+      discount_shopId: convertToObjectId(shop_id),
     });
-
-    if (!foundDiscount) {
-      throw new NotFoundError("Discount not found");
+    if (!discount || !discount.discount_is_active) {
+      throw new NotFoundError("Discount code not found");
     }
 
-    // Validate discount
-    await this.validateDiscount({
-      discount: foundDiscount,
-      userId,
-      orderValue,
-    });
-
-    // Calculate discount amount
-    const amount =
-      foundDiscount.discount_type === "fixed"
-        ? foundDiscount.discount_value
-        : (orderValue * foundDiscount.discount_value) / 100;
-
-    return {
-      discount: foundDiscount,
-      totalOrder: orderValue,
-      discount_amount: amount,
-      final_price: orderValue - amount,
-    };
-  }
-
-  /**
-   * Get all discount codes
-   * @param {Object} query
-   * @returns {Promise<Array>} List of discounts
-   */
-  static async getAllDiscountsByShop({
-    shopId,
-    limit = 50,
-    page = 1,
-    isActive,
-  }) {
-    const query = {
-      discount_shopId: convertToObjectId(shopId),
-    };
-
-    if (typeof isActive !== "undefined") {
-      query.discount_is_active = isActive;
+    // Check if discount is applicable to specific products or all products
+    // 1/ If discount applies to specific products, filter by product IDs
+    if (discount.discount_applies_to === "specific") {
+      const productIds = discount.discount_product_ids.map((id) =>
+        id.toString()
+      );
+      const products = await ProductRepository.findAllProducts({
+        shop_id: convertToObjectId(shop_id),
+        limit,
+        page,
+        filter: {
+          product_shop: convertToObjectId(shop_id),
+          _id: { $in: productIds },
+        },
+      });
+      return products;
     }
 
-    return await DiscountModel.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
-
-  /**
-   * Verify a discount code
-   * @param {Object} payload
-   * @returns {Promise<Object>} Verified discount
-   */
-  static async verifyDiscountCode({ code, shopId, userId }) {
-    const foundDiscount = await DiscountModel.findOne({
-      discount_code: code,
-      discount_shopId: convertToObjectId(shopId),
-    });
-
-    if (!foundDiscount) {
-      throw new NotFoundError("Discount not found");
+    // 2/ If discount applies to all products, return all products
+    if (discount.discount_applies_to === "all") {
+      const products = await ProductRepository.findAllProducts({
+        shop_id: convertToObjectId(shop_id),
+        limit,
+        page,
+      });
+      return products;
     }
-
-    // Validate basic discount rules
-    await this.validateDiscount({
-      discount: foundDiscount,
-      userId,
-    });
-
-    return foundDiscount;
   }
 
   /**
