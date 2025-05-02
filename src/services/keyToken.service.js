@@ -3,6 +3,11 @@ const { Types } = require("mongoose");
 const KeyTokenModel = require("../models/keyToken.model");
 
 class KeyTokenService {
+  /**
+   * Create or update a key token for a user (used for authentication/session management)
+   * @param {Object} param0 - userId, publicKey, privateKey, token, refreshToken
+   * @returns {Promise<ObjectId|null>} userId if successful, null otherwise
+   */
   static createKeyToken = async ({
     userId,
     publicKey,
@@ -47,6 +52,11 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Find a key token document by user ID
+   * @param {string} userId
+   * @returns {Promise<Object|null>} KeyToken document or null
+   */
   static findByUserId = async (userId) => {
     try {
       return await KeyTokenModel.findOne({
@@ -57,6 +67,12 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Find a key token by user ID and token (access or refresh)
+   * @param {string} userId
+   * @param {string} token
+   * @returns {Promise<Object|null>} KeyToken document or null
+   */
   static findKeyByUserIdAndToken = async (userId, token) => {
     try {
       return await KeyTokenModel.findOne({
@@ -69,6 +85,11 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Find a key token by refresh token
+   * @param {string} refreshToken
+   * @returns {Promise<Object|null>} KeyToken document or null
+   */
   static findKeyByRefreshToken = async (refreshToken) => {
     try {
       return await KeyTokenModel.findOne({
@@ -79,6 +100,11 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Remove a key token by its document ID
+   * @param {string} keyStore - KeyToken document ID
+   * @returns {Promise<Object|null>} Deleted KeyToken document or null
+   */
   static removeKeyById = async (keyStore) => {
     try {
       const key = await KeyTokenModel.findByIdAndDelete(keyStore).lean();
@@ -88,6 +114,11 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Remove all key tokens for a user by user ID
+   * @param {string} userId
+   * @returns {Promise<Object>} Delete result
+   */
   static removeKeyByUserId = async (userId) => {
     try {
       const key = await KeyTokenModel.deleteMany({
@@ -99,6 +130,11 @@ class KeyTokenService {
     }
   };
 
+  /**
+   * Find a key token by a used refresh token (for replay attack prevention)
+   * @param {string} refreshToken
+   * @returns {Promise<Object|null>} KeyToken document or null
+   */
   static findKeyByUsedRefreshToken = async (refreshToken) => {
     try {
       return await KeyTokenModel.findOne({

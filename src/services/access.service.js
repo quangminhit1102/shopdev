@@ -18,11 +18,19 @@ const {
 const { CREATED, OK } = require("../core/success.response");
 
 class AccessService {
+  /**
+   * Test endpoint to check access
+   * @returns {Promise<string>} Hello world
+   */
   static async getAccess() {
     return "Hello world";
   }
 
-  // Login a User
+  /**
+   * Login a user
+   * @param {Object} param0 - email, password
+   * @returns {Promise<Object>} Tokens
+   */
   static async login({ email, password }) {
     // Find user by email
     const userInfo = await shopModel.findOne({ email: email }).lean().exec();
@@ -71,6 +79,11 @@ class AccessService {
     return { token, refreshToken };
   }
 
+  /**
+   * Logout a user (removes their key/token)
+   * @param {Object} param0 - keyStore
+   * @returns {Promise<Object>} Info about deleted key
+   */
   static async logout({ keyStore }) {
     const delKey = await KeyTokenService.removeKeyById(keyStore);
     return getObjectInformation(
@@ -79,6 +92,11 @@ class AccessService {
     );
   }
 
+  /**
+   * Refresh authentication tokens using a refresh token
+   * @param {Object} param0 - refreshToken
+   * @returns {Promise<Object>} User info and new tokens
+   */
   static async refresh({ refreshToken }) {
     // 1. Find key by used refresh token => Prevent replay attack
     var foundKey = await KeyTokenService.findKeyByUsedRefreshToken(
@@ -140,6 +158,11 @@ class AccessService {
     };
   }
 
+  /**
+   * Refresh authentication tokens (version 2, with keyStore and user)
+   * @param {Object} param0 - keyStore, user, refreshToken
+   * @returns {Promise<Object>} User info and new tokens
+   */
   static async refreshV2({ keyStore, user, refreshToken }) {
     const { _id: userId, email } = user;
 
@@ -197,7 +220,11 @@ class AccessService {
     };
   }
 
-  // Register a new User
+  /**
+   * Register a new user/shop
+   * @param {Object} param0 - name, email, password
+   * @returns {Promise<Object>} Shop info and tokens
+   */
   static async register({ name, email, password }) {
     // Hash password
     const saltRounds = 10;
