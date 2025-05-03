@@ -3,6 +3,7 @@
 const { BadRequestError, NotFoundError } = require("../core/error.response");
 const DiscountModel = require("../models/discount.model");
 const ProductRepository = require("../models/repositories/product.repo");
+const DiscountRepository = require("../models/repositories/discount.repo");
 const { convertToObjectId } = require("../utils");
 
 /* 
@@ -116,6 +117,18 @@ class DiscountService {
       });
       return products;
     }
+  }
+
+  static async GetAllDiscountsByShop({ shop_id, limit, page }) {
+    return await DiscountRepository.findAllDiscountCodesUnselect({
+      limit,
+      page,
+      filter: {
+        discount_shopId: convertToObjectId(shop_id),
+      },
+      model: DiscountModel,
+      unselect: ["__v", "createdAt", "updatedAt", "_id"],
+    });
   }
 
   /**

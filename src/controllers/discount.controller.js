@@ -43,8 +43,8 @@ class DiscountController {
   static async getAllDiscountsByShop(req, res) {
     new OK({
       message: "Get all discounts successfully",
-      metadata: await DiscountService.getAllDiscountsByShop({
-        shopId: req.user.id,
+      metadata: await DiscountService.GetAllDiscountsByShop({
+        shop_id: req.user._id,
         ...req.query,
       }),
     }).send(res);
