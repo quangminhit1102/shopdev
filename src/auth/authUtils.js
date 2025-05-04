@@ -64,7 +64,7 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
   if (!userId) throw new AuthFailureError("Unauthorized");
 
   // 2. find key by userId
-  let keyStore = await KeyTokenService.findByUserId(userId);
+  const keyStore = await KeyTokenService.findByUserId(userId);
   log("Key store:", keyStore);
   if (!keyStore) throw new AuthFailureError("Unauthorized");
 
@@ -81,6 +81,8 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
       req.refreshToken = refreshToken;
       return next();
     } catch (err) {
+      // Log error for auditing
+      log("Refresh token verification failed:", err.message);
       throw new AuthFailureError("Invalid refresh token");
     }
   }
@@ -89,12 +91,15 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
   const token = req.headers[HEADER.AUTHORIZATION];
   if (!token) throw new AuthFailureError("Unauthorized");
   // verify token
-  await JWT.verify(token, keyStore.publicKey, (err, user) => {
-    if (err) throw new AuthFailureError(err.message);
+  JWT.verify(token, keyStore.publicKey, (err, user) => {
+    if (err) {
+      log("Access token verification failed:", err.message);
+      return next(new AuthFailureError(err.message));
+    }
     req.keyStore = keyStore;
     req.user = user;
     log("Authentication v2 Passed with userId::", user._id);
-    next();
+    return next();
   });
 });
 
