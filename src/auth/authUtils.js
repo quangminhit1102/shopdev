@@ -93,7 +93,7 @@ const authenticateV2 = asyncHandler(async (req, res, next) => {
     if (err) throw new AuthFailureError(err.message);
     req.keyStore = keyStore;
     req.user = user;
-    // console.log("Decoded user:", user);
+    log("Authentication v2 Passed with userId::", user._id);
     next();
   });
 });

@@ -19,8 +19,10 @@ router.get(
 
 router.get("", asyncHandler(discountController.getAllDiscountsByShop));
 
-router.post("/verify", asyncHandler(discountController.verifyDiscountCode));
+router.post("/amount", asyncHandler(discountController.getDiscountAmount));
+
 router.delete("/:code", asyncHandler(discountController.deleteDiscountCode));
+
 router.post("/cancel", asyncHandler(discountController.cancelDiscountCode));
 
 module.exports = router;

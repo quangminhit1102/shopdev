@@ -30,6 +30,7 @@ class DiscountController {
       metadata: await DiscountService.getAllProductsByDiscountCode({
         ...req.body,
         shop_id: req.user._id,
+        code: req.params.code,
       }),
     }).send(res);
   }
@@ -50,18 +51,12 @@ class DiscountController {
     }).send(res);
   }
 
-  /**
-   * Verify a discount code for a user.
-   * @route POST /v1/api/discount/verify
-   * @param {Request} req
-   * @param {Response} res
-   */
-  static async verifyDiscountCode(req, res) {
+  static async getDiscountAmount(req, res) {
     new OK({
-      message: "Verify discount code successfully",
-      metadata: await DiscountService.verifyDiscountCode({
+      message: "Get discount amount successfully",
+      metadata: await DiscountService.getDiscountAmount({
         ...req.body,
-        userId: req.user.id,
+        shop_id: req.user._id,
       }),
     }).send(res);
   }
@@ -76,7 +71,7 @@ class DiscountController {
     new OK({
       message: "Delete discount code successfully",
       metadata: await DiscountService.deleteDiscountCode({
-        shopId: req.user.id,
+        shop_id: req.user._id,
         code: req.params.code,
       }),
     }).send(res);
@@ -93,7 +88,7 @@ class DiscountController {
       message: "Cancel discount code successfully",
       metadata: await DiscountService.cancelDiscountCode({
         ...req.body,
-        userId: req.user.id,
+        shop_id: req.user._id,
       }),
     }).send(res);
   }
