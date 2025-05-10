@@ -38,15 +38,15 @@ class CartService {
   }
 
   static async updateUserCart({ user_id, product }) {
-    const { productId, quantity } = product;
+    const { product_id, quantity } = product;
     const query = {
       cart_userId: user_id,
       cart_state: "active",
-      "cart_products.productId": productId,
+      "cart_products.product_id": product_id,
     };
     const updateOrInsert = {
       $inc: {
-        "cart_products.$[product].quantity": quantity,
+        "cart_products.$.quantity": quantity,
       },
     };
     const options = {
@@ -95,12 +95,9 @@ class CartService {
     ],
   }]
   */
-  static async addToCartV2({ user_id, product = {} }) {
-    const {
-      product_id: product_id,
-      quantity,
-      old_quantity,
-    } = shop_order_ids[0].item_products[0];
+  static async addToCartV2({ user_id, shop_order_ids }) {
+    const product = shop_order_ids[0].item_products[0];
+    const { product_id, quantity, old_quantity = 1 } = product;
 
     // Check product in DB
     const foundProduct = await productRepository.findProductById({
@@ -108,16 +105,26 @@ class CartService {
     });
     if (!foundProduct) throw new Error("Product not found");
 
+    // Check if the user has a cart -> If not, create a new cart
+    const cart = await cartModel.findOne({
+      cart_userId: user_id,
+      cart_state: "active",
+    });
+    if (!cart) {
+      return await CartService.createUserCart({ user_id, product: product });
+    }
+
+    // Check if the product is already in the cart -> If yes, increase the quantity
     if (quantity === 0) {
       // Remove product from cart
       const query = {
         cart_userId: user_id,
         cart_state: "active",
-        "cart_products.productId": product_id,
+        "cart_products.product_id": product_id,
       };
       const updateOrInsert = {
         $pull: {
-          cart_products: { productId: product_id },
+          cart_products: { product_id: product_id },
         },
       };
       const options = {
@@ -125,7 +132,7 @@ class CartService {
         new: true,
       };
 
-      return await cartModels
+      return await cartModel
         .findOneAndUpdate(query, updateOrInsert, options)
         .exec();
     }

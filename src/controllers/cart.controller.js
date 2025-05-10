@@ -7,7 +7,7 @@ class CartController {
   addToCart = async (req, res) => {
     new OK({
       message: "Add to cart successfully",
-      metadata: await CartService.addToCart({
+      metadata: await CartService.createUserCart({
         ...req.body,
         shop_id: req.user._id,
       }),
@@ -17,7 +17,7 @@ class CartController {
   updateCart = async (req, res) => {
     new OK({
       message: "Update cart successfully",
-      metadata: await CartService.updateCart({
+      metadata: await CartService.addToCartV2({
         ...req.body,
         shop_id: req.user._id,
       }),
