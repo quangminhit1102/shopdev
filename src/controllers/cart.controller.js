@@ -37,7 +37,7 @@ class CartController {
     new OK({
       message: "Get cart successfully",
       metadata: await CartService.getCart({
-        ...req.body,
+        ...req.query,
         shop_id: req.user._id,
       }),
     }).send(res);
