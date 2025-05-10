@@ -18,4 +18,7 @@ router.use("/shopdev", access);
 // Discount router
 router.use("/shopdev/discount", discount);
 
+// Cart router
+router.use("/shopdev/cart", require("./cart"));
+
 module.exports = router;
