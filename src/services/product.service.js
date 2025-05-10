@@ -265,6 +265,7 @@ class ProductStrategy {
       "product_thumb",
       "product_description",
       "product_price",
+      "product_shop",
     ],
   }) {
     return productRepo.findAllProducts({ limit, sort, page, filter, select });

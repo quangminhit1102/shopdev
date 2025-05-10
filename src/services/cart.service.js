@@ -2,7 +2,6 @@
 
 const cartModel = require("../models/cart.model");
 const productRepository = require("../models/repositories/product.repo");
-const CartService = require("./cart.service");
 
 /* 
     Key features: Cart service
@@ -97,12 +96,15 @@ class CartService {
   }]
   */
   static async addToCartV2({ user_id, product = {} }) {
-    const { proudct_id, quantity, old_quantity } =
-      shop_order_ids[0].item_products[0];
+    const {
+      product_id: product_id,
+      quantity,
+      old_quantity,
+    } = shop_order_ids[0].item_products[0];
 
     // Check product in DB
     const foundProduct = await productRepository.findProductById({
-      product_id: proudct_id,
+      product_id: product_id,
     });
     if (!foundProduct) throw new Error("Product not found");
 
@@ -111,11 +113,11 @@ class CartService {
       const query = {
         cart_userId: user_id,
         cart_state: "active",
-        "cart_products.productId": proudct_id,
+        "cart_products.productId": product_id,
       };
       const updateOrInsert = {
         $pull: {
-          cart_products: { productId: proudct_id },
+          cart_products: { productId: product_id },
         },
       };
       const options = {
@@ -131,7 +133,7 @@ class CartService {
     return await CartService.updateUserCart({
       user_id,
       product: {
-        product_id: proudct_id,
+        product_id: product_id,
         quantity: quantity - old_quantity,
         name: foundProduct.product_name,
         price: foundProduct.product_price,
@@ -139,7 +141,7 @@ class CartService {
     });
   }
 
-  static async deleteUserCart({ user_id, product_id }) {
+  static async deleteCart({ user_id, product_id }) {
     const query = {
       cart_userId: user_id,
       cart_state: "active",
@@ -160,7 +162,7 @@ class CartService {
       .exec();
   }
 
-  static async getUserCart({ user_id }) {
+  static async getCart({ user_id }) {
     const query = {
       cart_userId: user_id,
       cart_state: "active",
@@ -169,4 +171,4 @@ class CartService {
   }
 }
 
-modele.exports = CartService;
+module.exports = CartService;

@@ -3,11 +3,11 @@
 const express = require("express");
 const cartController = require("../../controllers/cart.controller");
 const { asyncHandler } = require("../../helpers/asyncHandler");
-const { authentication } = require("../../auth/authUtils");
+const { authenticateV2 } = require("../../auth/authUtils");
 const router = express.Router();
 
 // Authentication middleware - required for all cart operations
-router.use(authentication);
+router.use(authenticateV2);
 
 /**
  * Cart API Endpoints

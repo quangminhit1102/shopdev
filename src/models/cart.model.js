@@ -40,7 +40,7 @@ const cartSchema = new mongoose.Schema(
   },
   {
     Collection: COLLECTION_NAME,
-    timeseries: {
+    timestamps: {
       createdAt: "createdOn", // createdOn is the field name for the creation date
       updatedAt: "modifiedOn", // modifiedOn is the field name for the last update date
     },
