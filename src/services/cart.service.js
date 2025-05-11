@@ -15,26 +15,61 @@ const productRepository = require("../models/repositories/product.repo");
 
 class CartService {
   static async createUserCart({ user_id, product }) {
+    const { product_id, quantity: inputQuantity } = product;
+    const quantity = Math.max(1, inputQuantity); // Ensure minimum quantity is 1
+
+    // Validate product existence
+    const foundProduct = await productRepository.findProductById({
+      product_id,
+    });
+    if (!foundProduct) {
+      throw new Error("Product not found");
+    }
+
     const query = {
       cart_userId: user_id,
       cart_state: "active",
     };
-    const updateOrInsert = {
-      $addToSet: {
-        cart_products: product,
-      },
-      $set: {
-        cart_count_product: 1,
-      },
-    };
-    const options = {
-      upsert: true,
-      new: true,
+
+    // Prepare product data
+    const productData = {
+      product_id,
+      shop_id: foundProduct.product_shop,
+      quantity,
+      name: foundProduct.product_name,
+      price: foundProduct.product_price,
     };
 
-    return await cartModel
-      .findOneAndUpdate(query, updateOrInsert, options)
-      .exec();
+    // Check if cart exists and product is in cart
+    const foundCart = await cartModel.findOne(query);
+    const isProductInCart = foundCart?.cart_products?.some(
+      (item) => item.product_id === product_id
+    );
+
+    // Update configuration
+    const updateConfig = {
+      query: { ...query },
+      update: isProductInCart
+        ? {
+            $set: { "cart_products.$.quantity": quantity },
+          }
+        : {
+            $push: { cart_products: productData },
+          },
+      options: { upsert: true, new: true },
+    };
+
+    // Add product filter if updating existing product
+    if (isProductInCart) {
+      updateConfig.query["cart_products.product_id"] = product_id;
+    }
+
+    // Execute update
+    return await cartModel.findOneAndUpdate(
+      updateConfig.query,
+      updateConfig.update,
+      updateConfig.options
+    );
   }
 
   static async updateUserCart({ user_id, products }) {
@@ -95,7 +130,9 @@ class CartService {
   */
   static async addToCartV2({ user_id, shop_order_ids }) {
     const product = shop_order_ids[0].item_products[0];
-    const { product_id, quantity, old_quantity = 1 } = product;
+    let { product_id, quantity = 1, old_quantity = 1 } = product;
+    quantity = Math.max(1, quantity); // Ensure minimum quantity is 1
+    old_quantity = Math.max(1, old_quantity); // Ensure minimum quantity is 1
 
     // Check product in DB
     const foundProduct = await productRepository.findProductById({
@@ -112,38 +149,27 @@ class CartService {
       return await CartService.createUserCart({ user_id, product: product });
     }
 
-    // Check if the product is already in the cart -> If yes, increase the quantity
-    if (quantity === 0) {
-      // Remove product from cart
-      const query = {
-        cart_userId: user_id,
-        cart_state: "active",
-        "cart_products.product_id": product_id,
-      };
-      const updateOrInsert = {
-        $pull: {
-          cart_products: { product_id: product_id },
-        },
-      };
-      const options = {
-        upsert: true,
-        new: true,
-      };
-
-      return await cartModel
-        .findOneAndUpdate(query, updateOrInsert, options)
-        .exec();
+    // Check if the product is already in the cart
+    // -> If yes, increase the quantity
+    // -> If not, add the product to the cart
+    const foundProductInCart = cart.cart_products.find(
+      (item) => item.product_id === product_id
+    );
+    // Increase the quantity
+    if (foundProductInCart) {
+      foundProductInCart.quantity = quantity;
+      return await cart.save();
     }
-
-    return await CartService.updateUserCart({
-      user_id,
-      product: {
-        product_id: product_id,
-        quantity: quantity,
-        name: foundProduct.product_name,
-        price: foundProduct.product_price,
-      },
+    // Add the product to the cart
+    cart.cart_products.push({
+      product_id: product_id,
+      quantity: quantity,
+      name: foundProduct.product_name,
+      price: foundProduct.product_price,
+      old_quantity: old_quantity,
+      product_shop: foundProduct.product_shop,
     });
+    return await cart.save();
   }
 
   static async deleteCart({ user_id, product_id }) {
@@ -151,6 +177,18 @@ class CartService {
       cart_userId: user_id,
       cart_state: "active",
     };
+    if (product_id) {
+      // Remove a single product from the cart
+      const updatedCart = await cartModel.findOneAndUpdate(
+        query,
+        {
+          $pull: { cart_products: { product_id } },
+        },
+        { new: true }
+      );
+      return updatedCart;
+    }
+    // Remove the entire cart
     return await cartModel.findOneAndDelete(query).exec();
   }
 
@@ -159,29 +197,14 @@ class CartService {
       cart_userId: user_id,
       cart_state: "active",
     };
-
-    return await cartModel.findOne(query).exec();
-  }
-
-  static async updateProductQuantity({ user_id, product_id, quantity }) {
-    const query = {
-      cart_userId: user_id,
-      cart_state: "active",
-      "cart_products.product_id": product_id,
-    };
-    const updateOrInsert = {
-      $set: {
-        "cart_products.$.quantity": quantity,
-      },
-    };
-    const options = {
-      upsert: true,
-      new: true,
-    };
-
-    return await cartModel
-      .findOneAndUpdate(query, updateOrInsert, options)
-      .exec();
+    const cart = await cartModel.findOne(query).lean();
+    if (!cart) return null;
+    // Calculate total price
+    cart.total_price = (cart.cart_products || []).reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    return cart;
   }
 }
 
