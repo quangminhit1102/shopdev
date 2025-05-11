@@ -14,6 +14,12 @@ const productRepository = require("../models/repositories/product.repo");
 */
 
 class CartService {
+  /**
+   * Create a new cart for the user or add a product to an existing cart.
+   * If the product already exists in the cart, update its quantity.
+   * @param {Object} param0 - { user_id, product }
+   * @returns {Promise<Object>} - The updated or created cart document
+   */
   static async createUserCart({ user_id, product }) {
     const { product_id, quantity: inputQuantity } = product;
     const quantity = Math.max(1, inputQuantity); // Ensure minimum quantity is 1
@@ -72,6 +78,11 @@ class CartService {
     );
   }
 
+  /**
+   * Update the user's cart with new product details.
+   * @param {Object} param0 - { user_id, products }
+   * @returns {Promise<Object|Error>} - The updated cart or error if not found
+   */
   static async updateUserCart({ user_id, products }) {
     // Find card and update if the product is already in the cart
     let foundCart = await cartModel.findOne({
@@ -92,6 +103,12 @@ class CartService {
     }
   }
 
+  /**
+   * Add a product to the user's cart.
+   * If the cart does not exist, create a new one.
+   * @param {Object} param0 - { user_id, product }
+   * @returns {Promise<Object>} - The updated or created cart document
+   */
   static async addToCart({ user_id, product = {} }) {
     // Check if the user has a cart -> If not, create a new cart
     const cart = await cartModel.findOne({
@@ -112,22 +129,12 @@ class CartService {
     return await CartService.updateUserCart({ user_id, product });
   }
 
-  /*
-  shop_order_ids: [
-  {
-    item_products: [
-      {
-        shop_id,
-        product_id,
-        quantity,
-        old_quantity,
-        price,
-        product_id,
-        product_name,
-      },
-    ],
-  }]
-  */
+  /**
+   * Add products to the cart using the V2 structure (shop_order_ids).
+   * Handles both adding new products and updating quantities.
+   * @param {Object} param0 - { user_id, shop_order_ids }
+   * @returns {Promise<Object>} - The updated cart document
+   */
   static async addToCartV2({ user_id, shop_order_ids }) {
     const product = shop_order_ids[0].item_products[0];
     let { product_id, quantity = 1, old_quantity = 1 } = product;
@@ -172,6 +179,13 @@ class CartService {
     return await cart.save();
   }
 
+  /**
+   * Delete a product from the user's cart or clear the entire cart.
+   * If product_id is provided, remove only that product.
+   * Otherwise, remove the entire cart.
+   * @param {Object} param0 - { user_id, product_id }
+   * @returns {Promise<Object>} - The updated cart or result of cart deletion
+   */
   static async deleteCart({ user_id, product_id }) {
     const query = {
       cart_userId: user_id,
@@ -192,6 +206,11 @@ class CartService {
     return await cartModel.findOneAndDelete(query).exec();
   }
 
+  /**
+   * Get the user's active cart and calculate the total price.
+   * @param {Object} param0 - { user_id }
+   * @returns {Promise<Object|null>} - The cart with total price or null if not found
+   */
   static async getCart({ user_id }) {
     const query = {
       cart_userId: user_id,
