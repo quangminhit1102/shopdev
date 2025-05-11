@@ -37,26 +37,24 @@ class CartService {
       .exec();
   }
 
-  static async updateUserCart({ user_id, product }) {
-    const { product_id, quantity } = product;
-    const query = {
+  static async updateUserCart({ user_id, products }) {
+    // Find card and update if the product is already in the cart
+    let foundCart = await cartModel.findOne({
       cart_userId: user_id,
       cart_state: "active",
-      "cart_products.product_id": product_id,
-    };
-    const updateOrInsert = {
-      $inc: {
-        "cart_products.$.quantity": quantity,
-      },
-    };
-    const options = {
-      upsert: true,
-      new: true,
-    };
-
-    return await cartModel
-      .findOneAndUpdate(query, updateOrInsert, options)
-      .exec();
+    });
+    if (!foundCart) {
+      return NotFoundError("Cart not found");
+    } else {
+      products = foundCart.cart_products.map((product) => {
+        if (product.product_id === products.product_id) {
+          product.quantity = products.quantity;
+          product.price = products.price;
+          product.name = products.name;
+        }
+        return product;
+      });
+    }
   }
 
   static async addToCart({ user_id, product = {} }) {
@@ -141,7 +139,7 @@ class CartService {
       user_id,
       product: {
         product_id: product_id,
-        quantity: quantity - old_quantity,
+        quantity: quantity,
         name: foundProduct.product_name,
         price: foundProduct.product_price,
       },
@@ -152,11 +150,28 @@ class CartService {
     const query = {
       cart_userId: user_id,
       cart_state: "active",
-      "cart_products.productId": product_id,
+    };
+    return await cartModel.findOneAndDelete(query).exec();
+  }
+
+  static async getCart({ user_id }) {
+    const query = {
+      cart_userId: user_id,
+      cart_state: "active",
+    };
+
+    return await cartModel.findOne(query).exec();
+  }
+
+  static async updateProductQuantity({ user_id, product_id, quantity }) {
+    const query = {
+      cart_userId: user_id,
+      cart_state: "active",
+      "cart_products.product_id": product_id,
     };
     const updateOrInsert = {
-      $pull: {
-        cart_products: { productId: product_id },
+      $set: {
+        "cart_products.$.quantity": quantity,
       },
     };
     const options = {
@@ -167,14 +182,6 @@ class CartService {
     return await cartModel
       .findOneAndUpdate(query, updateOrInsert, options)
       .exec();
-  }
-
-  static async getCart({ user_id }) {
-    const query = {
-      cart_userId: user_id,
-      cart_state: "active",
-    };
-    return await cartModel.findOne(query).exec();
   }
 }
 
