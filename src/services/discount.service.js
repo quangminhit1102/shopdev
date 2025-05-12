@@ -211,6 +211,7 @@ class DiscountService {
     return {
       discountCode: discount.discount_code,
       totalPriceBefore: totalOrderValue,
+      discount: amount,
       totalPrice: totalOrderValue - amount,
       discount_type: discount.discount_type,
       discount_value: discount.discount_value,
