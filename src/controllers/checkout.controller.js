@@ -10,10 +10,10 @@ class CheckoutController {
       message: "Checkout review successfully",
       metadata: await CheckoutService.checkoutReview({
         ...req.body,
-        user_id: req.user._id,
+        shop_id: req.user._id,
       }),
     }).send(res);
   };
 }
 
-module.exports = CheckoutController;
+module.exports = new CheckoutController();

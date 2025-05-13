@@ -2,6 +2,8 @@
 
 const { NotFoundError } = require("../core/error.response");
 const DiscountService = require("../services/discount.service");
+const CartModel = require("../models/cart.model");
+const { Product: ProductModel } = require("../models/product.model");
 
 class CheckoutService {
   // only login user can checkout
@@ -44,8 +46,8 @@ class CheckoutService {
     // Check cart exists
     const foundCart = await CartModel.findOne({
       _id: cart_id,
-      user_id,
-      cart_status: "active",
+      cart_userId: user_id,
+      cart_state: "active",
     });
     if (!foundCart) {
       throw new NotFoundError("Cart not found");
@@ -69,7 +71,7 @@ class CheckoutService {
           const foundProduct = ProductModel.findOne({
             _id: item.product_id,
           });
-          if (foundProduct) {
+          if (foundProduct != null) {
             return {
               product_id: foundProduct._id,
               product_name: foundProduct.product_name,
@@ -98,7 +100,7 @@ class CheckoutService {
         item_products: foundProducts,
       };
 
-      if (shop_discount.length > 0) {
+      if (shop_discounts.length > 0) {
         const { totalPrice = 0, discount = 0 } =
           await DiscountService.getDiscountAmount({
             code: shop_discounts[0].code,
