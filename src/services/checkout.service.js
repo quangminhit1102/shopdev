@@ -67,8 +67,8 @@ class CheckoutService {
 
       // Check products from cart from Database
       const foundProducts = await Promise.all(
-        item_products.map((item) => {
-          const foundProduct = ProductModel.findOne({
+        item_products.map(async (item) => {
+          const foundProduct = await ProductModel.findOne({
             _id: item.product_id,
           });
           if (foundProduct != null) {
@@ -76,8 +76,7 @@ class CheckoutService {
               product_id: foundProduct._id,
               product_name: foundProduct.product_name,
               product_price: foundProduct.product_price,
-              product_quantity: item.product_quantity,
-              product_discount: item.product_discount,
+              product_quantity: item.product_quantity ?? 1,
             };
           }
         })
@@ -101,16 +100,16 @@ class CheckoutService {
       };
 
       if (shop_discounts.length > 0) {
-        const { totalPrice = 0, discount = 0 } =
-          await DiscountService.getDiscountAmount({
-            code: shop_discounts[0].code,
-            shop_id,
-            user_id,
-            products: foundProducts,
-          });
-
-        checkout_order.total_discount += discount;
-        itemCheckout.price_apply_discount += totalPrice;
+        const { discount = 0 } = await DiscountService.getDiscountAmount({
+          code: shop_discounts[0],
+          shop_id,
+          user_id,
+          products: foundProducts,
+        });
+        if (discount > 0) {
+          checkout_order.total_discount += discount;
+          itemCheckout.price_apply_discount -= discount;
+        }
       }
 
       // Calculate total checkout
