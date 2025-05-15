@@ -123,6 +123,25 @@ class CheckoutService {
       checkout_order,
     };
   }
+
+  static async orderByUser({
+    shop_order_ids,
+    user_id,
+    cart_id,
+    user_address,
+    user_payment,
+    user_note,
+  }) {
+    const { shop_order_ids_new, checkout_order } =
+      await CheckoutService.checkoutReview({
+        cart_id,
+        user_id,
+        shop_order_ids,
+      });
+
+    // Check if products are available in stock
+    const products = shop_order_ids_new.flatMap((order) => order.item_products);
+  }
 }
 
 module.exports = CheckoutService;
