@@ -4,6 +4,8 @@ const { NotFoundError } = require("../core/error.response");
 const DiscountService = require("../services/discount.service");
 const CartModel = require("../models/cart.model");
 const { Product: ProductModel } = require("../models/product.model");
+const { acquireLock, releaseLock } = require("./redis.service");
+const orderModel = require("../models/order.model");
 
 class CheckoutService {
   // only login user can checkout
@@ -141,6 +143,35 @@ class CheckoutService {
 
     // Check if products are available in stock
     const products = shop_order_ids_new.flatMap((order) => order.item_products);
+    let acquireProducts = [];
+    for (const product of products) {
+      const { product_id, product_quantity } = product;
+      const keyLock = await acquireLock(product_id, product_quantity, cart_id);
+      acquireProducts.push(keyLock);
+      // If the lock is not acquired, release the lock
+      if (!keyLock) {
+        await releaseLock(keyLock);
+      }
+
+      // Check if any product is available in stock
+      if (acquireProducts.includes(false)) {
+        throw new NotFoundError("Product not available in stock");
+      }
+
+      const newOrder = await orderModel.create({
+        order_userId: user_id,
+        order_checkout: checkout_order,
+        order_shipping: user_address,
+        order_payment: user_payment,
+        order_note: user_note,
+        order_products: shop_order_ids_new,
+      });
+
+      if (newOrder) {
+        // Remove products from cart
+      }
+      return newOrder;
+    }
   }
 }
 
