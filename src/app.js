@@ -5,6 +5,8 @@ const morgan = require("morgan");
 const { default: helmet } = require("helmet");
 const compression = require("compression");
 const cors = require("cors");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./configs/swagger');
 const errorHandler = require("./middlewares/errorHandler");
 
 // Security HTTP headers
@@ -19,6 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Response compression
 app.use(compression());
+
+// Swagger documentation route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Initialize database
 require("./dbs/init.mongodb");
