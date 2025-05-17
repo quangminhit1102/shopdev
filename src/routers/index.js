@@ -15,13 +15,19 @@ router.use("/shopdev/product", product);
 // Access router
 router.use("/shopdev", access);
 
+// Inventory router
+router.use("/shopdev/inventory", require("./inventory"));
+
 // Discount router
 router.use("/shopdev/discount", discount);
 
 // Cart router
 router.use("/shopdev/cart", require("./cart"));
 
-// checkout router
+// Checkout router
 router.use("/shopdev/checkout", require("./checkout"));
+
+// Order router
+router.use("/shopdev/orders", require("./order"));
 
 module.exports = router;
