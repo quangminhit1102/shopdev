@@ -7,15 +7,69 @@ const { CREATED, OK } = require("../core/success.response");
 const AccessService = require("../services/access.service");
 
 /**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication and authorization endpoints
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     LoginRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         password:
+ *           type: string
+ *           format: password
+ *     RegisterRequest:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *       properties:
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         password:
+ *           type: string
+ *           format: password
+ */
+
+/**
  * Handles user authentication and authorization endpoints.
  * Each method delegates to the corresponding service for business logic.
  */
 class AccessController {
   /**
-   * Login a user with email and password.
-   * @route POST /shopdev/login
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
+   * @swagger
+   * /shopdev/login:
+   *   post:
+   *     summary: Login a user
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/LoginRequest'
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *       401:
+   *         description: Invalid credentials
+   *       500:
+   *         description: Server error
    */
   static async login(req, res, next) {
     new OK({
@@ -25,10 +79,24 @@ class AccessController {
   }
 
   /**
-   * Register a new user/shop.
-   * @route POST /shopdev/register
-   * @param {Request} req
-   * @param {Response} res
+   * @swagger
+   * /shopdev/register:
+   *   post:
+   *     summary: Register a new user/shop
+   *     tags: [Authentication]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/RegisterRequest'
+   *     responses:
+   *       201:
+   *         description: User registered successfully
+   *       400:
+   *         description: Invalid input
+   *       500:
+   *         description: Server error
    */
   static async register(req, res, next) {
     new CREATED({
@@ -38,10 +106,20 @@ class AccessController {
   }
 
   /**
-   * Logout the current user by removing their key/token.
-   * @route POST /shopdev/logout
-   * @param {Request} req
-   * @param {Response} res
+   * @swagger
+   * /shopdev/logout:
+   *   post:
+   *     summary: Logout the current user
+   *     tags: [Authentication]
+   *     security:
+   *       - BearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Logout successful
+   *       401:
+   *         description: Unauthorized
+   *       500:
+   *         description: Server error
    */
   static async logout(req, res, next) {
     new OK({
@@ -51,10 +129,20 @@ class AccessController {
   }
 
   /**
-   * Refresh the authentication token using a refresh token.
-   * @route POST /shopdev/refresh
-   * @param {Request} req
-   * @param {Response} res
+   * @swagger
+   * /shopdev/refresh-token:
+   *   post:
+   *     summary: Refresh authentication token
+   *     tags: [Authentication]
+   *     security:
+   *       - BearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Token refreshed successfully
+   *       401:
+   *         description: Invalid refresh token
+   *       500:
+   *         description: Server error
    */
   static async refresh(req, res, next) {
     new OK({
@@ -68,10 +156,20 @@ class AccessController {
   }
 
   /**
-   * Test endpoint to check access (for debugging or health check).
-   * @route GET /shopdev/access
-   * @param {Request} req
-   * @param {Response} res
+   * @swagger
+   * /shopdev:
+   *   get:
+   *     summary: Get user access information
+   *     tags: [Authentication]
+   *     security:
+   *       - BearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Access information retrieved successfully
+   *       401:
+   *         description: Unauthorized
+   *       500:
+   *         description: Server error
    */
   static async getAccess(req, res, next) {
     new OK({
