@@ -196,6 +196,9 @@ Redis Pub/Sub characteristics:
 - Fire-and-forget pattern with real-time delivery
 - Subscribers must be connected to receive messages
 
+So while Redis Pub/Sub is excellent for real-time notifications, chat systems, or broadcasting events, if you need reliable message queuing with persistence and delivery guarantees, you'd want to use **Redis Streams** or consider dedicated message queue systems like **RabbitMQ, Apache Kafka, or Amazon SQS**.
+
+
 ### 6. Expiration Best Practices
 
 - Set TTLs appropriate to data volatility
