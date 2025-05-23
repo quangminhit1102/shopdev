@@ -185,7 +185,18 @@ PERSIST key
 - **One-Time Tokens**: `SETEX reset:password:token123 900 "user@example.com"`
 - **Time-to-Live Data**: `SETEX promotion:flash-sale 86400 "active"`
 
-### 5. Expiration Best Practices
+### 5. Is Redis Pub/Sub is a message queue system?
+
+Redis Pub/Sub is a messaging pattern, but it's **not a full message queue system** in the traditional sense. Here are the key distinctions:
+Redis Pub/Sub characteristics:
+
+- Messages are broadcast to all active subscribers immediately
+- No message persistence - if no subscribers are listening, messages are lost
+- No delivery guarantees - messages aren't stored or retried
+- Fire-and-forget pattern with real-time delivery
+- Subscribers must be connected to receive messages
+
+### 6. Expiration Best Practices
 
 - Set TTLs appropriate to data volatility
 - Avoid identical TTLs for bulk keys
