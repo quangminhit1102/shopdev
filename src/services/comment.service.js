@@ -19,6 +19,23 @@ class CommentService {
     });
     return await comment.save();
   }
+
+  static async getCommentsByProductId(product_id) {
+    return await Comment.find({ comment_productId: product_id })
+      .populate("comment_userId", "user_name user_avatar")
+      .sort({ createdAt: -1 });
+  }
+
+  static async deleteComment(comment_id, user_id) {
+    const comment = await Comment.findById(comment_id);
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+    if (comment.comment_userId.toString() !== user_id.toString()) {
+      throw new Error("You do not have permission to delete this comment");
+    }
+    return await Comment.findByIdAndDelete(comment_id);
+  }
 }
 
 module.exports = new CommentService();
