@@ -30,4 +30,7 @@ router.use("/shopdev/checkout", require("./checkout"));
 // Order router
 router.use("/shopdev/orders", require("./order"));
 
+// Comment router
+router.use("/shopdev/comment", require("./comment"));
+
 module.exports = router;

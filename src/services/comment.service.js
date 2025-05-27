@@ -17,6 +17,34 @@ class CommentService {
       comment_content: content,
       comment_parentId: parent_id,
     });
+
+    let rightValue;
+
+    if (parent_id) {
+      // reply to a comment
+    } else {
+      const maxRightValue = await Comment.findOne({
+        comment_productId: product_id,
+      })
+        .sort({ comment_right: -1 })
+        .select("comment_right");
+
+      if (maxRightValue) {
+        // If there are existing comments, set rightValue to maxRightValue + 2
+        rightValue = maxRightValue.comment_right + 1;
+      } else {
+        // If no comments exist, set rightValue to 1
+        rightValue = 1;
+      }
+
+      // Insert to comment
+      comment.comment_left = rightValue;
+      comment.comment_right = rightValue + 1;
+
+      await comment.save();
+      return comment;
+    }
+
     return await comment.save();
   }
 
@@ -38,4 +66,4 @@ class CommentService {
   }
 }
 
-module.exports = new CommentService();
+module.exports = CommentService;

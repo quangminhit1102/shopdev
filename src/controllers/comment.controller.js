@@ -1,0 +1,18 @@
+"use strict";
+
+const CommentService = require("../services/comment.service");
+const { OK } = require("../core/success.response");
+
+class CommentController {
+  createComment = async (req, res, next) => {
+    new OK({
+      message: "Create comment successfully",
+      metadata: await CommentService.addComment({
+        ...req.body,
+        user_id: req.user._id,
+      }),
+    }).send(res);
+  };
+}
+
+module.exports = new CommentController();
