@@ -5,9 +5,13 @@ const router = express.Router();
 const access = require("./access");
 const product = require("./product");
 const discount = require("./discount");
+const comment = require("./comment");
 
 // Middleware to check API key
 // router.use(require("../auth/checkAuth"));
+
+// Comment router
+router.use("/shopdev/comment", comment);
 
 // Product router
 router.use("/shopdev/product", product);
@@ -29,8 +33,5 @@ router.use("/shopdev/checkout", require("./checkout"));
 
 // Order router
 router.use("/shopdev/orders", require("./order"));
-
-// Comment router
-router.use("/shopdev/comment", require("./comment"));
 
 module.exports = router;

@@ -10,13 +10,13 @@ router.post("/login", asyncHandler(AccessController.login));
 
 router.post("/register", asyncHandler(AccessController.register));
 
+router.get("", asyncHandler(AccessController.getAccess));
+
 // Authentication
 router.use(authenticateV2);
 
 router.post("/logout", asyncHandler(AccessController.logout));
 
 router.post("/refresh-Token", asyncHandler(AccessController.refresh));
-
-router.get("", asyncHandler(AccessController.getAccess));
 
 module.exports = router;

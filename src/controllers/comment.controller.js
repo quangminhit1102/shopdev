@@ -9,7 +9,6 @@ class CommentController {
       message: "Create comment successfully",
       metadata: await CommentService.addComment({
         ...req.body,
-        user_id: req.user._id,
       }),
     }).send(res);
   };

@@ -7,6 +7,6 @@ const router = express.Router();
 // // Authentication middleware - required for all cart operations
 // router.use(authenticateV2);
 
-router.post("/comment", asyncHandler(CommentController.createComment));
+router.post("/", asyncHandler(CommentController.createComment));
 
 module.exports = router;
