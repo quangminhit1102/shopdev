@@ -48,10 +48,10 @@ class CommentService {
     return await comment.save();
   }
 
-  static async getCommentsByProductId(product_id) {
-    return await Comment.find({ comment_productId: product_id })
-      .populate("comment_userId", "user_name user_avatar")
-      .sort({ createdAt: -1 });
+  static async getCommentsByProductId({ product_id }) {
+    return await Comment.find({ comment_productId: product_id }).sort({
+      createdAt: -1,
+    });
   }
 
   static async deleteComment(comment_id, user_id) {

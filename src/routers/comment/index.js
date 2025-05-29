@@ -9,4 +9,6 @@ const router = express.Router();
 
 router.post("/", asyncHandler(CommentController.createComment));
 
+router.get("/", asyncHandler(CommentController.getCommentsByProductId));
+
 module.exports = router;

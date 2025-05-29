@@ -12,6 +12,15 @@ class CommentController {
       }),
     }).send(res);
   };
+
+  getCommentsByProductId = async (req, res, next) => {
+    new OK({
+      message: "Get comments by product ID successfully",
+      metadata: await CommentService.getCommentsByProductId({
+        ...req.body,
+      }),
+    }).send(res);
+  };
 }
 
 module.exports = new CommentController();
