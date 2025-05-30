@@ -1,8 +1,8 @@
 # API Key: Essential Overview
 
-## API key 
+## API key
 
-An <strong>API key <strong> is a unique string that identifies and authenticates applications or users accessing an API service, functioning as a simple digital token for access control.
+An **API key** is a unique string that identifies and authenticates applications or users accessing an API service, functioning as a simple digital token for access control.
 
 ## Core Functions
 
