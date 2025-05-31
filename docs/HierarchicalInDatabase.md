@@ -39,31 +39,30 @@ Example Structure:
 
 ## Nested set model
 
-The Nested Set Model represents hierarchical data as nested sets, where parent nodes encompass all their child nodes.
+The Nested Set Model is a powerful way to represent hierarchical (tree-like) data in a relational database. It encodes the tree structure by assigning two numbers—`left` and `right`—to each node, based on a depth-first traversal. This allows for efficient queries to retrieve entire subtrees, leaf nodes, and node depth, but makes insertions and deletions more complex.
 
-How it works:
+### How It Works
 
-- Each node is traversed twice during a depth-first traversal
-  Numbers are assigned from left to right
-  Each node gets two values: left and right
-  Parent nodes have larger ranges that contain their children's ranges
+- Each node is visited twice during a depth-first traversal: once when entering (assign `left`), and once when exiting (assign `right`).
+- The root node's `left` is always 1, and its `right` is the largest number (2 × number of nodes).
+- All descendants of a node have `left` and `right` values between the parent's `left` and `right`.
+- Leaf nodes have consecutive `left` and `right` values (difference of 1).
 
-Visual Representation as Nested Sets:
+#### Example Tree
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│ ELECTRONICS (1,18)                                          │
-│ ┌─────────────────────────┐  ┌─────────────────────────────┐│
-│ │ TELEVISIONS (2,9)       │  │ PORTABLE ELECTRONICS (10,17)││
-│ │ ┌─────┐ ┌─────┐ ┌─────┐ │  │ ┌─────┐ ┌─────┐ ┌─────────┐ ││
-│ │ │TUBE │ │ LCD │ │PLASM│ │  │ │ MP3 │ │ CD  │ │2 WAY    │ ││
-│ │ │(3,4)│ │(5,6)│ │(7,8)│ │  │ │(11,12)│(13,14)│RADIOS   │ ││
-│ │ └─────┘ └─────┘ └─────┘ │  │ └─────┘ └─────┘ │(15,16)  │ ││
-│ └─────────────────────────┘  └─────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
+ELECTRONICS
+├── TELEVISIONS
+│   ├── TUBE
+│   ├── LCD
+│   └── PLASMA
+└── PORTABLE ELECTRONICS
+    ├── MP3 PLAYERS
+    ├── CD PLAYERS
+    └── 2 WAY RADIOS
 ```
 
-Table Representation:
+#### Table Representation
 
 | ID  | Name                 | Left | Right |
 | --- | -------------------- | ---- | ----- |
@@ -77,7 +76,75 @@ Table Representation:
 | 8   | CD PLAYERS           | 13   | 14    |
 | 9   | 2 WAY RADIOS         | 15   | 16    |
 
-![alt text](Images/Nested-set-model.png)
+#### Visual Representation
+
+![Nested Set Model](Images/Nested-set-model.png)
+
+### Key Operations
+
+#### 1. Finding All Descendants of a Node
+
+To get all descendants of a node, select nodes whose `left` and `right` are between the parent's values:
+
+```sql
+SELECT * FROM nested_category WHERE left > @parent_left AND right < @parent_right;
+```
+
+#### 2. Finding Leaf Nodes
+
+Leaf nodes have `right - left = 1`:
+
+```sql
+SELECT name FROM nested_category WHERE (right - left) = 1;
+```
+
+#### 3. Finding Node Depth
+
+Node depth is the number of ancestors (parents) a node has:
+
+```sql
+SELECT node.name, (COUNT(parent.name) - 1) AS depth
+FROM nested_category AS node, nested_category AS parent
+WHERE node.left BETWEEN parent.left AND parent.right
+GROUP BY node.name
+ORDER BY node.left;
+```
+
+#### 4. Inserting a New Node
+
+To insert a new node as a child of a parent node:
+
+1. Update all nodes with `left` or `right` greater than the parent's `right` by adding 2.
+2. Insert the new node with `left = parent.right`, `right = parent.right + 1`.
+
+**Example:** Add "GAME CONSOLES" as a new child of "ELECTRONICS" after "TELEVISIONS":
+
+- Update all nodes with `left` or `right` > 9 (TELEVISIONS' right) by +2.
+- Insert `GAME CONSOLES (10, 11)`.
+
+#### 5. Deleting a Node
+
+To delete a node (and its subtree):
+
+1. Delete all nodes with `left` and `right` between the node's `left` and `right`.
+2. Subtract `(right - left + 1)` from all nodes with `left` or `right` greater than the deleted node's `right`.
+
+### Advantages
+
+- Efficient subtree and ancestor queries (single query, no recursion).
+- Good for read-heavy, static hierarchies.
+
+### Disadvantages
+
+- Insertions, deletions, and moves require updating many rows (can be slow for large trees).
+- More complex to implement than parent-child or materialized path models.
+
+### When to Use
+
+- When you need to frequently query entire subtrees or hierarchies.
+- When the tree structure is relatively static (few insertions/deletions).
+
+---
 
 **Data Structure**:
 Each node stores two values:
