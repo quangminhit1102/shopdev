@@ -71,6 +71,42 @@ class CommentService {
     });
   }
 
+  static async getCommentsByParentId({
+    product_id,
+    parent_id,
+    limit = 10,
+    skip = 0,
+  }) {
+    // Parent comment validation
+    const parentComment = await Comment.findOne({
+      comment_productId: product_id,
+      _id: parent_id,
+    });
+    if (!parentComment) {
+      throw new NotFoundError("Parent comment not found");
+    }
+
+    const comments = await Comment.find({
+      comment_productId: product_id,
+      comment_parentId: parent_id,
+      comment_left: { $gt: parentComment.comment_left },
+      comment_right: { $lt: parentComment.comment_right },
+    })
+      .select({
+        comment_left: 1,
+        comment_right: 1,
+        comment_content: 1,
+        comment_userId: 1,
+        comment_parentId: 1,
+        comment_productId: 1,
+        createdAt: 1,
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    return comments;
+  }
+
   static async deleteComment(comment_id, user_id) {
     const comment = await Comment.findById(comment_id);
     if (!comment) {

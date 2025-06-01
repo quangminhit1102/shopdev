@@ -11,4 +11,6 @@ router.post("/", asyncHandler(CommentController.createComment));
 
 router.get("/", asyncHandler(CommentController.getCommentsByProductId));
 
+router.get("/parent", asyncHandler(CommentController.getCommentsByParentId));
+
 module.exports = router;
