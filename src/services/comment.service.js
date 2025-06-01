@@ -32,6 +32,16 @@ class CommentService {
       }
 
       // reply to a comment
+      rightValue = parentComment.comment_right;
+
+      // Update many comment has rightValue >= parentComment
+      await Comment.updateMany(
+        {
+          comment_productId: product_id,
+          comment_right: { $gte: rightValue },
+        },
+        { $inc: { comment_right: 2 } }
+      );
     } else {
       const maxRightValue = await Comment.findOne({
         comment_productId: product_id,
@@ -46,16 +56,13 @@ class CommentService {
         // If no comments exist, set rightValue to 1
         rightValue = 1;
       }
-
-      // Insert to comment
-      comment.comment_left = rightValue;
-      comment.comment_right = rightValue + 1;
-
-      await comment.save();
-      return comment;
     }
+    // Insert to comment
+    comment.comment_left = rightValue;
+    comment.comment_right = rightValue + 1;
 
-    return await comment.save();
+    await comment.save();
+    return comment;
   }
 
   static async getCommentsByProductId({ product_id }) {
