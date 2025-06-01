@@ -13,4 +13,6 @@ router.get("/", asyncHandler(CommentController.getCommentsByProductId));
 
 router.get("/parent", asyncHandler(CommentController.getCommentsByParentId));
 
+router.delete("/:comment_id", asyncHandler(CommentController.deleteComment));
+
 module.exports = router;

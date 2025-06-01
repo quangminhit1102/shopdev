@@ -107,14 +107,50 @@ class CommentService {
     return comments;
   }
 
-  static async deleteComment(comment_id, user_id) {
+  static async deleteComment({ comment_id, user_id, product_id }) {
+    // validate product
+    const product = await Comment.findOne({
+      comment_productId: product_id,
+    });
+    if (!product) {
+      throw new NotFoundError("Product not found");
+    }
+
     const comment = await Comment.findById(comment_id);
     if (!comment) {
       throw new Error("Comment not found");
     }
-    if (comment.comment_userId.toString() !== user_id.toString()) {
-      throw new Error("You do not have permission to delete this comment");
-    }
+    // Get Comment left and right value of the comment
+    const leftValue = comment.comment_left;
+    const rightValue = comment.comment_right;
+
+    // Calculate the width of the comment
+    const width = rightValue - leftValue + 1;
+
+    // Delete the comments related to the comment
+    await Comment.deleteMany({
+      comment_productId: product_id,
+      comment_left: { $gte: leftValue },
+      comment_right: { $lte: rightValue },
+    });
+
+    // Update the left and right of back comments
+    await Comment.updateMany(
+      {
+        comment_productId: product_id,
+        comment_left: { $gt: rightValue },
+      },
+      { $inc: { comment_left: -width } }
+    );
+
+    await Comment.updateMany(
+      {
+        comment_productId: product_id,
+        comment_right: { $gt: rightValue },
+      },
+      { $inc: { comment_right: -width } }
+    );
+
     return await Comment.findByIdAndDelete(comment_id);
   }
 }
