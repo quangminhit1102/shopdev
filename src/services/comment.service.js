@@ -1,6 +1,7 @@
 "use strict";
 
 const Comment = require("../models/comment.model");
+const { NotFoundError } = require("../core/error.response");
 
 /*
     Key features of the Comment Service:
@@ -21,6 +22,15 @@ class CommentService {
     let rightValue;
 
     if (parent_id) {
+      // Parent comment validation
+      const parentComment = await Comment.findOne({
+        comment_productId: product_id,
+        _id: parent_id,
+      });
+      if (!parentComment) {
+        throw new NotFoundError("Parent comment not found");
+      }
+
       // reply to a comment
     } else {
       const maxRightValue = await Comment.findOne({
