@@ -79,6 +79,7 @@ ELECTRONICS
 #### Visual Representation
 
 ![Nested Set Model](Images/Nested-set-model.png)
+![alt text](Images/Nested-set-model-01.png)
 
 ### Key Operations
 
@@ -128,6 +129,10 @@ To delete a node (and its subtree):
 
 1. Delete all nodes with `left` and `right` between the node's `left` and `right`.
 2. Subtract `(right - left + 1)` from all nodes with `left` or `right` greater than the deleted node's `right`.
+
+
+![alt text](Images/Delete-items-Nested-set-model.png)
+
 
 ### Advantages
 
