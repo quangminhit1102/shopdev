@@ -34,4 +34,7 @@ router.use("/shopdev/checkout", require("./checkout"));
 // Order router
 router.use("/shopdev/orders", require("./order"));
 
+// Notification router
+router.use("/shopdev/notification", require("./notification"));
+
 module.exports = router;

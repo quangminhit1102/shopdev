@@ -40,7 +40,55 @@ const pushNotification = async ({
   return notification;
 };
 
+const getNotificationsByUser = async ({ userId, type = "ALL", isRead = 0 }) => {
+  const match = {
+    notification_receiverId: userId,
+  };
+  if (type !== "ALL") {
+    match.notification_type = type;
+  }
+
+  if (isRead === 1) {
+    match.notification_status = "read";
+  } else if (isRead === 0) {
+    match.notification_status = "unread";
+  }
+
+  const notifications = await Notification.aggregate([
+    {
+      $match: match,
+    },
+    {
+      $sort: { createdAt: -1 }, // Sort by creation date, newest first
+    },
+    {
+      $project: {
+        _id: 1,
+        notification_type: 1,
+        notification_senderId: 1,
+        notification_receiverId: 1,
+        notification_content: {
+          $concat: [
+            {
+              $substr: ["$notification_option.shop_name", 0, -1],
+            },
+            notification_content,
+            {
+              $substr: ["$notification_option.product_name", 0, -1],
+            },
+          ],
+        },
+        notification_status: 1,
+        notification_options: 1,
+        createdAt: 1,
+      },
+    },
+  ]);
+  return notifications;
+};
+
 module.exports = {
   pushNotification,
   NOTIFICATION_TYPES,
+  getNotificationsByUser,
 };
