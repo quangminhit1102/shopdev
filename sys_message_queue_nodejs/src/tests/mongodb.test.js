@@ -1,7 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const connectionString = "mongodb://localhost:27017/testdb"; // Adjust the connection string as needed
+const connectionString = "mongodb://localhost:27017/ShopDev"; // Adjust the connection string as needed
 
 const TestSchema = new mongoose.Schema({
   name: String,
