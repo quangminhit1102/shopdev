@@ -31,5 +31,5 @@ consumerToQueueFailed("deadLetterQueue")
   })
   .catch((error) => {
     console.error("Error starting consumer for consumerToQueueFailed:", error);
-    process.exit(1);
+    process.exit(1); 
   });

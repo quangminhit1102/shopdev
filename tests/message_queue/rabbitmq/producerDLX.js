@@ -24,7 +24,6 @@ const runProducer = async () => {
     const queueResult = await channel.assertQueue(notificationQueue, {
       durable: true, // durable: true means the queue will survive a server restart
       exclusive: false, // exclusive: false means the queue can be used by other consumers
-      autoDelete: false, // autoDelete: false means the queue will not be deleted when the last consumer unsubscribes
       deadLetterExchange: deadLetterExchange, // Set dead letter exchange
       deadLetterRoutingKey: deadLetterRoutingKey, // Set dead letter routing key
     });

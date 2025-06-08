@@ -2,6 +2,11 @@
 
 const { consumerQueue, connectToRabbitMQ } = require("../dbs/init.rabbitmq");
 
+const log = console.log;
+console.log = function () {
+  log.apply(console, [new Date().toJSON(), ...arguments]);
+};
+
 const messageService = {
   consumerToQueue: async (queue_name) => {
     try {
@@ -20,22 +25,17 @@ const messageService = {
       const notificationQueue = "notificationQueueProcess"; // Queue for processing notifications
 
       const timeExpiration = 10000; // Set message expiration to 10000 ms (10 seconds)
-      setTimeout(async () => {
-        channel.consume(
-          notificationQueue,
-          async (msg) => {
-            if (msg !== null) {
-              console.log(
-                `Received message from ${notificationQueue}:`,
-                msg.content.toString()
-              );
-              channel.ack(msg);
-            } else {
-              console.log(`No messages in queue: ${notificationQueue}`);
-            }
-          },
-          { noAck: false } // Set noAck to false to acknowledge messages after processing
-        );
+
+      setTimeout(() => {
+        channel.consume(notificationQueue, (msg) => {
+          // Wait for the delay using Promise
+          console.log(
+            `Received message from ${notificationQueue}:`,
+            msg.content.toString()
+          );
+          // Acknowledge the message after processing
+          channel.nack(msg);
+        });
       }, timeExpiration);
     } catch (error) {
       console.error(`Error in consumerToQueueNormal for ${queue_name}:`, error);
@@ -69,7 +69,7 @@ const messageService = {
       );
 
       await channel.consume(
-        deadLetterQueue,
+        queueResult.queue,
         async (msg) => {
           if (msg !== null) {
             console.log(
@@ -80,7 +80,7 @@ const messageService = {
             console.log(`No messages in queue: ${deadLetterQueue}`);
           }
         },
-        { noAck: true } // Set noAck to false to acknowledge messages after processing
+        { noAck: true } // Set noAck to false to acknowledge messages after processing, true to not acknowledge
       );
     } catch (error) {
       console.error(`Error in consumerToQueueFailed for ${queue_name}:`, error);
