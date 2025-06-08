@@ -26,7 +26,7 @@ const messageService = {
 
       const timeExpiration = 10000; // Set message expiration to 10000 ms (10 seconds)
 
-      // // TTL (Time-To-Live) Error
+      // // 1. TTL (Time-To-Live) Error
       // setTimeout(() => {
       //   channel.consume(notificationQueue, (msg) => {
       //     // Wait for the delay using Promise
@@ -39,7 +39,7 @@ const messageService = {
       //   });
       // }, timeExpiration);
 
-      // Logic Error
+      // 2. Logic Error
       channel.consume(notificationQueue, (msg) => {
         const number = Math.random();
         console.log(
