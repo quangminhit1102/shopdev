@@ -77,5 +77,17 @@ Open-source message broker implementing **AMQP** protocol, with plugins for STOM
 - Simple caching → **Redis**
 - Massive scale (millions msg/sec) → **Kafka/Pulsar**
 
+## DLX: Dead Letter Exchange
+
+Dead-lettering in RabbitMQ occurs when messages are republished to an exchange due to specific events:
+
+- **Negative acknowledgment**: The message is explicitly rejected by an AMQP receiver or consumer.
+
+- **Expiration**: The message has exceeded its time-to-live (TTL).
+
+- **Queue overflow**: The message is dropped because the queue exceeds its length limit.
+
+- **Delivery limit exceeded**: The message is returned more times than the allowed threshold in a quorum queue.
+
 ![alt text](Images/RabbitMQ-DelayTTL.png)
 TTL: Time to Live
