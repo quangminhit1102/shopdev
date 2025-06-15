@@ -37,4 +37,7 @@ router.use("/shopdev/orders", require("./order"));
 // Notification router
 router.use("/shopdev/notification", require("./notification"));
 
+// Upload router
+router.use("/shopdev/upload", require("./upload"));
+
 module.exports = router;
