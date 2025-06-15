@@ -5,6 +5,9 @@
 1. [Overview](#overview)
 2. [How Indexes Work](#how-indexes-work)
 3. [Types of Indexes](#types-of-indexes)
+   - [B-Tree Indexes](#1-b-tree-indexes)
+   - [Hash Indexes](#2-hash-indexes)
+   - [Spatial (R-Tree) Indexes](#3-spatial-r-tree-indexes)
 4. [Multiple-Column Indexes](#multiple-column-indexes)
 5. [Leftmost Prefix Rule](#leftmost-prefix-rule)
 6. [Query Patterns That Use Indexes](#query-patterns-that-use-indexes)
@@ -12,6 +15,10 @@
 8. [Analyzing Index Usage](#analyzing-index-usage)
 9. [Best Practices](#best-practices)
 10. [Performance Considerations](#performance-considerations)
+11. [Advanced Topics](#advanced-topics)
+12. [Conclusion](#conclusion)
+
+---
 
 ## Overview
 
@@ -31,6 +38,8 @@
 - Support various query patterns (exact matches, ranges, sorting)
 - Essential for large-scale applications
 
+---
+
 ## How Indexes Work
 
 Think of indexes like a book's table of contents:
@@ -48,6 +57,8 @@ SELECT first_name FROM sakila.actor WHERE actor_id = 5;
 - If `actor_id` is indexed, MySQL uses the index to find rows with `actor_id = 5`
 - Instead of scanning the entire table, it performs an index lookup
 - Returns matching rows efficiently
+
+---
 
 ## Types of Indexes
 
@@ -96,9 +107,6 @@ SELECT first_name FROM sakila.actor WHERE actor_id = 5;
 - Designed for geographic applications
 - Supported by MyISAM engine
 - Works with geometric data types like GEOMETRY
-
-**Features:**
-
 - Indexes data across all dimensions simultaneously
 - Doesn't require leftmost prefix in WHERE clauses
 - Supports efficient lookups using any dimension combination
@@ -108,6 +116,8 @@ SELECT first_name FROM sakila.actor WHERE actor_id = 5;
 
 - MySQL GIS support is limited
 - Most applications use PostGIS with PostgreSQL for advanced GIS needs
+
+---
 
 ## Multiple-Column Indexes
 
@@ -128,6 +138,8 @@ CREATE TABLE test (
     INDEX name (last_name, first_name)
 );
 ```
+
+---
 
 ## Leftmost Prefix Rule
 
@@ -164,6 +176,8 @@ SELECT * FROM test WHERE last_name='Widenius' AND first_name='Michael';
 SELECT * FROM test WHERE first_name='Michael';
 ```
 
+---
+
 ## Query Patterns That Use Indexes
 
 ### 1. Full Value Match
@@ -198,6 +212,8 @@ SELECT * FROM test WHERE last_name='Widenius'
 SELECT * FROM test WHERE last_name LIKE 'J%';
 ```
 
+---
+
 ## Index Limitations
 
 ### 1. Leftmost Prefix Requirement
@@ -213,9 +229,16 @@ SELECT * FROM test WHERE first_name='Michael';
 
 **Problem:** OR conditions often prevent index usage
 
-```sql
+```sql EX1
 -- ❌ Cannot efficiently use leftmost prefix
 SELECT * FROM test WHERE last_name='Widenius' OR first_name='Michael';
+```
+
+```sql EX2
+-- With index on (col1, col2, col3)
+-- Without index (col4)
+-- ❌ Only col1 and col2 can be optimized, col3 cannot
+SELECT * FROM test WHERE col1 = 'value' OR col2 > 10 OR col4 = 'another';
 ```
 
 ### 3. Right-side Wildcards
@@ -236,9 +259,27 @@ SELECT * FROM test WHERE last_name LIKE '%J';
 
 ```sql
 -- With index on (col1, col2, col3)
--- Only col1 and col2 can be optimized, col3 cannot
+-- ❌ Only col1 and col2 can be optimized, col3 cannot
 SELECT * FROM test WHERE col1 = 'value' AND col2 > 10 AND col3 = 'another';
 ```
+
+### 6. Calculations on indexed columns in WHERE clauses
+
+**Problem:** Do not use calculations on indexed columns in WHERE clauses, as it prevents index usage.
+
+```sql
+-- ❌ Inefficient query without index
+EXPLAIN select * from users where usr_id+1 = 2
+EXPLAIN select * from users where substr(usr_status,1,2) = 1
+```
+
+### 7. Using ORDER BY clause without WHERE OR LIMIT clause
+
+````sql
+-- ❌ Inefficient query without index
+EXPLAIN select * from users where order by usr_email, usr_name
+
+---
 
 ## Analyzing Index Usage
 
@@ -248,7 +289,7 @@ SELECT * FROM test WHERE col1 = 'value' AND col2 > 10 AND col3 = 'another';
 
 ```sql
 EXPLAIN SELECT * FROM table_name WHERE conditions;
-```
+````
 
 **Key Columns to Analyze:**
 
@@ -284,6 +325,8 @@ mysql> EXPLAIN SELECT * FROM users WHERE email LIKE "%m";
 - With index: 1,514 rows examined
 - Without index: 19,853 rows examined (13x more!)
 
+---
+
 ## Best Practices
 
 ### 1. Index Design
@@ -310,6 +353,8 @@ mysql> EXPLAIN SELECT * FROM users WHERE email LIKE "%m";
 - **Monitor slow queries:** Identify problematic queries
 - **Index usage statistics:** Remove unused indexes
 
+---
+
 ## Performance Considerations
 
 ### Index Benefits
@@ -331,6 +376,8 @@ mysql> EXPLAIN SELECT * FROM users WHERE email LIKE "%m";
 - **Storage cost:** Consider disk space requirements
 - **Application patterns:** Optimize for actual usage patterns
 
+---
+
 ## Advanced Topics
 
 ### Covering Indexes
@@ -351,6 +398,10 @@ mysql> EXPLAIN SELECT * FROM users WHERE email LIKE "%m";
 - Use sparingly and only when necessary
 - Can help in complex optimization scenarios
 
+---
+
 ## Conclusion
 
 MySQL indexes are powerful tools for query optimization, but they require careful planning and understanding. The leftmost prefix rule, query pattern analysis, and proper use of EXPLAIN are essential skills for database optimization. Remember that indexes are a trade-off between read performance and write performance, so design them based on your application's specific needs and query patterns.
+
+---
