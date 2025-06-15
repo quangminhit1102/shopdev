@@ -23,11 +23,32 @@ const uploadImageFromURL = async () => {
   }
 };
 
-// // Call the function to upload an image from a URL
-// uploadImageFromURL().catch((error) => {
-//   console.error("Upload failed:", error);
-// });
+const uploadImageFromLocal = async ({
+  path,
+  folderName = "product/shopId",
+}) => {
+  // This function will handle uploading an image from a local path to Cloudinary
+  try {
+    const result = await cloudinary.uploader.upload(path, {
+      folder: folderName,
+      public_id: "thumbnail",
+    });
+    return {
+      result,
+      thumbnail_url: cloudinary.url(result.public_id, {
+        transformation: [
+          { width: 300, height: 300, crop: "fill" }, // Resize to 300x300
+          { quality: "auto" }, // Auto quality
+        ],
+      }),
+    };
+  } catch (error) {
+    console.error("Error uploading image from local path:", error, path);
+    throw new Error("Failed to upload image from local path");
+  }
+};
 
 module.exports = {
   uploadImageFromURL,
+  uploadImageFromLocal,
 };

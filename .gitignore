@@ -67,3 +67,7 @@ public/
 
 # Windows system files
 Thumbs.db
+
+# Temporary files
+src/uploads
+src/uploads/*
