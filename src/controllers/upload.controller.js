@@ -39,6 +39,25 @@ class UploadController {
       metadata: result,
     }).send(res);
   }
+
+  /**
+   * Upload a file.
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  static async uploadImagesFromLocal(req, res) {
+    const { files } = req;
+    if (files.length === 0) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const result = await uploadService.uploadImagesFromLocal({
+      paths: files.map((file) => file.path),
+    });
+    new OK({
+      message: "File uploaded successfully",
+      metadata: result,
+    }).send(res);
+  }
 }
 
 module.exports = UploadController;

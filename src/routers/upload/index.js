@@ -18,4 +18,10 @@ router.post(
   asyncHandler(uploadController.uploadImageFromLocal)
 );
 
+router.post(
+  "/thumbs",
+  uploadDisk.array("file", 3), // Use disk storage for thumbnail uploads single file
+  asyncHandler(uploadController.uploadImagesFromLocal)
+);
+
 module.exports = router;

@@ -48,7 +48,42 @@ const uploadImageFromLocal = async ({
   }
 };
 
+const uploadImagesFromLocal = async ({
+  paths,
+  folderName = "product/shopId",
+}) => {
+  // This function will handle uploading an image from a local path to Cloudinary
+  try {
+    const results = await uploadImages(paths, folderName);
+    return results.map((result) => ({
+      result,
+      thumbnail_url: cloudinary.url(result.public_id, {
+        transformation: [
+          { width: 300, height: 300, crop: "fill" }, // Resize to 300x300
+          { quality: "auto" }, // Auto quality
+        ],
+      }),
+    }));
+  } catch (error) {
+    console.error("Error uploading image from local path:", error);
+    throw new Error("Failed to upload image from local path");
+  }
+};
+
+// Helper function to upload multiple images from local paths
+const uploadImages = async (paths, folderName) => {
+  let arrayResult = [];
+  for (const path in paths) {
+    const result = await cloudinary.uploader.upload(paths[path], {
+      folder: folderName,
+    });
+    arrayResult.push(result);
+  }
+  return arrayResult;
+};
+
 module.exports = {
   uploadImageFromURL,
   uploadImageFromLocal,
+  uploadImagesFromLocal,
 };
