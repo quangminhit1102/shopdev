@@ -2,6 +2,7 @@
 
 const cloudinary = require("../configs/cloudinary.config");
 const crypto = require("crypto");
+const urlImagePublic = `https://d3gmn25nrx25rn.cloudfront.net`;
 
 const {
   s3,
@@ -10,6 +11,9 @@ const {
   DeleteObjectCommand,
 } = require("../configs/s3.config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const {
+  getSignedUrl: getSignedUrlCloudfront,
+} = require("@aws-sdk/cloudfront-signer");
 const randomImageName = () => crypto.randomBytes(16).toString("hex");
 
 //#region Using AWS
@@ -23,18 +27,25 @@ const uploadImageFromLocalS3 = async ({ file }) => {
       ContentType: "image/jpeg",
     });
     const result = await s3.send(command);
-
     const signedURL = new GetObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: imageName,
     });
-    const url = await getSignedUrl(s3, signedURL, { expiresIn: 3600 });
-    console.log(`signedURL::${url}`);
-    console.log(`signedURL::${signedURL.toString()}`);
 
-    return { ...result, PublicURL: url };
+    // Get signed URL S3
+    const url = await getSignedUrl(s3, signedURL, { expiresIn: 3600 });
+
+    // Get Signed URL Cloudfront
+    const urlCloudfront = getSignedUrlCloudfront({
+      url: `${urlImagePublic}/${imageName}`,
+      keyPairId: process.env.AWS_CLOUDFRONT_PUBLIC_KEY, // Public key
+      privateKey: process.env.AWS_CLOUDFRONT_PRIVATE_KEY, // Private key
+      dateLessThan: new Date(Date.now() + 1000 * 60),
+    });
+
+    return { ...result, PublicURL: url, CloudfrontURL: urlCloudfront };
   } catch (error) {
-    console.error("Error uploading image from local path:", error, path);
+    console.error("Error uploading image from local path:", error);
     throw new Error("Failed to upload image from local path");
   }
 };
