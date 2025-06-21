@@ -71,3 +71,4 @@ Thumbs.db
 # Temporary files
 src/uploads
 src/uploads/*
+src/keys/*

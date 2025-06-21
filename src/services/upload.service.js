@@ -1,7 +1,61 @@
 "use strict";
 
 const cloudinary = require("../configs/cloudinary.config");
+const crypto = require("crypto");
 
+const {
+  s3,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require("../configs/s3.config");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const randomImageName = () => crypto.randomBytes(16).toString("hex");
+
+//#region Using AWS
+const uploadImageFromLocalS3 = async ({ file }) => {
+  try {
+    const imageName = randomImageName();
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: imageName, //file.originalname || "unknown",
+      Body: file.buffer,
+      ContentType: "image/jpeg",
+    });
+    const result = await s3.send(command);
+
+    const signedURL = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: imageName,
+    });
+    const url = await getSignedUrl(s3, signedURL, { expiresIn: 3600 });
+    console.log(`signedURL::${url}`);
+    console.log(`signedURL::${signedURL.toString()}`);
+
+    return { ...result, PublicURL: url };
+  } catch (error) {
+    console.error("Error uploading image from local path:", error, path);
+    throw new Error("Failed to upload image from local path");
+  }
+};
+
+const deleteImageFromLocalS3 = async ({ key }) => {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+    });
+    const result = await s3.send(command);
+    return result;
+  } catch (error) {
+    console.error("Error uploading image from local path:", error, path);
+    throw new Error("Failed to upload image from local path");
+  }
+};
+
+//#endregion
+
+//#region Using Cloudinary
 const uploadImageFromURL = async () => {
   // This function will handle uploading an image from a URL to Cloudinary
   // Implementation will go here
@@ -82,8 +136,12 @@ const uploadImages = async (paths, folderName) => {
   return arrayResult;
 };
 
+//#endregion
+
 module.exports = {
   uploadImageFromURL,
   uploadImageFromLocal,
   uploadImagesFromLocal,
+  uploadImageFromLocalS3,
+  deleteImageFromLocalS3,
 };
