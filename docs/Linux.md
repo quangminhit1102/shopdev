@@ -393,5 +393,16 @@ crontab -r             # Remove all cron jobs
 _This guide covers essential Linux commands and concepts. For detailed information, use `man command` or `command --help`._
 
 ```cmd
-sudo amazon-linux-extras install epel -y
+>sudo amazon-linux-extras install epel -y
+>sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+>sudo yum install mysql-community-service
+>sudo systemctl enable mysqld
+>sudo systemctl start mysqld
+>sudo systemctl status mysqld
+
+-get temporary password
+sudo cat /var/log/mysqld.log | grep "temporary password"
+mysql -uroot -p
+-change password
+ALTER USER root@'localhost' IDENTIFIED_WITH mysql_native_password BY "123455"
 ```
