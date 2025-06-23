@@ -393,9 +393,11 @@ crontab -r             # Remove all cron jobs
 _This guide covers essential Linux commands and concepts. For detailed information, use `man command` or `command --help`._
 
 ```cmd
+- Check image version
+>cat /etc/image-id 
 >sudo amazon-linux-extras install epel -y
 >sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
->sudo yum install mysql-community-service
+>sudo yum install mysql-community-server
 >sudo systemctl enable mysqld
 >sudo systemctl start mysqld
 >sudo systemctl status mysqld
