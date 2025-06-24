@@ -394,10 +394,15 @@ _This guide covers essential Linux commands and concepts. For detailed informati
 
 ```cmd
 - Check image version
->cat /etc/image-id 
+>cat /etc/image-id
 >sudo amazon-linux-extras install epel -y
+
 >sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+>sudo dnf install -y https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
+
 >sudo yum install mysql-community-server
+>sudo dnf install mysql-community-server -y
+
 >sudo systemctl enable mysqld
 >sudo systemctl start mysqld
 >sudo systemctl status mysqld
