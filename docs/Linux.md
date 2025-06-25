@@ -420,8 +420,6 @@ mysql -uroot -p
 #change password
 ALTER USER root@'localhost' IDENTIFIED WITH mysql_native_password BY "Abc@12345!"
 
-#go out mysql cmd
-\q
 # copy an file into EC2 Root folder
 scp -i <ssh> example.sql  <LinkEC2>:~/
 
@@ -437,4 +435,8 @@ mysql> mysql -uminhnq4 -p
 
 mysql> CREATE USER 'quangminhit'@'%' IDENTIFIED WITH mysql_native_password BY 'Abc@12345'
 mysql> GRANT ALL PRIVILEGES ON auth_system.* TO 'quangminhit'@'%';
+
+#go out mysql cmd
+mysql> \q
+mysql> exit
 ```
