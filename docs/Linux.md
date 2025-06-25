@@ -393,23 +393,48 @@ crontab -r             # Remove all cron jobs
 _This guide covers essential Linux commands and concepts. For detailed information, use `man command` or `command --help`._
 
 ```cmd
-- Check image version
+ssh -i <ssh> <LinkEC2>
+
+# Check image version
 >cat /etc/image-id
 >sudo amazon-linux-extras install epel -y
+# Linux2023
+>sudo dnf update -y
 
 >sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+# Linux2023
 >sudo dnf install -y https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
 
 >sudo yum install mysql-community-server
+# Linux2023
 >sudo dnf install mysql-community-server -y
 
 >sudo systemctl enable mysqld
 >sudo systemctl start mysqld
 >sudo systemctl status mysqld
 
--get temporary password
-sudo cat /var/log/mysqld.log | grep "temporary password"
+#get temporary password
+sudo cat /var/log/mysqld.log | grep "temporary password" 9>*496N:uUY/
 mysql -uroot -p
--change password
-ALTER USER root@'localhost' IDENTIFIED_WITH mysql_native_password BY "123455"
+
+#change password
+ALTER USER root@'localhost' IDENTIFIED WITH mysql_native_password BY "Abc@12345!"
+
+#go out mysql cmd
+\q
+# copy an file into EC2 Root folder
+scp -i <ssh> example.sql  <LinkEC2>:~/
+
+mysql> example.sql
+mysql> source example.sql
+mysql> show databases
+mysql> use auth_system
+mysql> show tables
+
+mysql> CREATE USER 'minhnq4'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Abc@12345!'
+mysql> GRANT ALL PRIVILEGES ON auth_system.* TO 'minhnq4'@'localhost';
+mysql> mysql -uminhnq4 -p
+
+mysql> CREATE USER 'quangminhit'@'%' IDENTIFIED WITH mysql_native_password BY 'Abc@12345'
+mysql> GRANT ALL PRIVILEGES ON auth_system.* TO 'quangminhit'@'%';
 ```
