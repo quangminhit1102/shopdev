@@ -397,21 +397,21 @@ ssh -i <ssh> <LinkEC2>
 
 # Check image version
 >cat /etc/image-id
->sudo amazon-linux-extras install epel -y
+> sudo amazon-linux-extras install epel -y
 # Linux2023
->sudo dnf update -y
+> sudo dnf update -y
 
->sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
+> sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm
 # Linux2023
->sudo dnf install -y https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
+> sudo dnf install -y https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm
 
->sudo yum install mysql-community-server
+> sudo yum install mysql-community-server
 # Linux2023
->sudo dnf install mysql-community-server -y
+> sudo dnf install mysql-community-server -y
 
->sudo systemctl enable mysqld
->sudo systemctl start mysqld
->sudo systemctl status mysqld
+> sudo systemctl enable mysqld
+> sudo systemctl start mysqld
+> sudo systemctl status mysqld
 
 #get temporary password
 sudo cat /var/log/mysqld.log | grep "temporary password" 9>*496N:uUY/
@@ -439,4 +439,31 @@ mysql> GRANT ALL PRIVILEGES ON auth_system.* TO 'quangminhit'@'%';
 #go out mysql cmd
 mysql> \q
 mysql> exit
+```
+
+```cmd
+# Install mongodb in Linux AWS
+> sudo vi /etc/yum.repos.d/mongodb-org-8.0.repo
+
+=> Copy
+"[mongodb-org-8.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://pgp.mongodb.com/server-8.0.asc"
+
+> sudo yum install -y mongodb-org
+
+> sudo systemctl start mongod
+> sudo systemctl status mongod
+> sudo systemctl enable mongod
+
+# config mongodb for production with IP
+> sudo vi /etc/mongod.conf
+# network interfaces
+net:
+  port: 27017
+  # bindIp: 127.0.0.1 # Comment out or remove this line
+  bindIp: 0.0.0.0 # Binds to all IPv4 addresses
 ```
