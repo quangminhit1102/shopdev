@@ -40,4 +40,7 @@ router.use("/shopdev/notification", require("./notification"));
 // Upload router
 router.use("/shopdev/upload", require("./upload"));
 
+// Profile router
+router.use("/shopdev/profile", require("./profile"));
+
 module.exports = router;
