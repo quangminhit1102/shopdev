@@ -43,4 +43,7 @@ router.use("/shopdev/upload", require("./upload"));
 // Profile router
 router.use("/shopdev/profile", require("./profile"));
 
+// RBAC router
+router.use("/shopdev/rbac", require("./rbac"));
+
 module.exports = router;
