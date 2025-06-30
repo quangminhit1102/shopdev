@@ -10,21 +10,22 @@ const createResource = async ({
 }) => {
   try {
     // 1. Check if the resource already exists
-    const existingResource = await ResourceModel.findOne({ slug });
+    const existingResource = await ResourceModel.findOne({ src_slug: slug });
     if (existingResource) {
       throw new BadRequestError(`Resource with slug ${slug} already exists`);
     }
     // 2. Create a new resource with the provided name, slug, and description
     const newResource = new ResourceModel({
-      name,
-      slug,
-      description,
+      src_name: name,
+      src_slug: slug,
+      src_description: description,
     });
     // 3. Save the new resource to the database
     await newResource.save();
+    return newResource;
   } catch (error) {
     console.error("Error creating resource:", error);
-    throw new BadRequestError("Failed to create resource");
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 
@@ -35,7 +36,7 @@ const resourceList = async ({ userId, limit, offset, search }) => {
     const resources = await ResourceModel.aggregate([
       {
         $project: {
-          _id: 0,
+          _id: "$_id",
           name: "$src_name",
           slug: "$src_slug",
           description: "$src_description",
@@ -47,7 +48,7 @@ const resourceList = async ({ userId, limit, offset, search }) => {
     return resources;
   } catch (error) {
     console.error("Error listing resources:", error);
-    throw new BadRequestError("Failed to list resources");
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 
@@ -73,7 +74,7 @@ const createRole = async ({
     return newRole;
   } catch (error) {
     console.error("Error creating role:", error);
-    throw new BadRequestError("Failed to create role");
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 
@@ -81,7 +82,7 @@ const roleList = async () => {
   try {
   } catch (error) {
     console.error("Error listing roles:", error);
-    throw new BadRequestError("Failed to list roles");
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 

@@ -3,42 +3,39 @@
 const RbacService = require("../services/rbac.service");
 const { OK, CREATED } = require("../core/success.response");
 
-class RbacController {
+class RBACController {
   // Create a new resource
-  static async createResource(req, res) {
-    const resource = await RbacService.createResource(req.body);
+  createResource = async (req, res) => {
     new CREATED({
       message: "Resource created successfully",
-      metadata: resource,
+      metadata: await RbacService.createResource({ ...req.body }),
     }).send(res);
-  }
+  };
 
   // List all resources
-  static async resourceList(req, res) {
+  resourceList = async (req, res) => {
     const resources = await RbacService.resourceList(req.query);
     new OK({
       message: "Resource list fetched successfully",
       metadata: resources,
     }).send(res);
-  }
+  };
 
   // Create a new role
-  static async createRole(req, res) {
-    const role = await RbacService.createRole(req.body);
+  createRole = async (req, res) => {
     new CREATED({
       message: "Role created successfully",
-      metadata: role,
+      metadata: await RbacService.createRole(req.body),
     }).send(res);
-  }
+  };
 
   // List all roles
-  static async roleList(req, res) {
-    const roles = await RbacService.roleList();
+  roleList = async (req, res) => {
     new OK({
       message: "Role list fetched successfully",
-      metadata: roles,
+      metadata: await RbacService.roleList(),
     }).send(res);
-  }
+  };
 }
 
-module.exports = RbacController;
+module.exports = new RBACController();
