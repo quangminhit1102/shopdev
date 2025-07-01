@@ -78,8 +78,52 @@ const createRole = async ({
   }
 };
 
-const roleList = async () => {
+const roleList = async ({
+  userId = 0, // Assuming userId is used to check permissions - Admin
+  limit = 10, // Default limit for pagination
+  offset = 0, // Default offset for pagination
+  search = "", // Search term for filtering roles
+}) => {
   try {
+    // 1. Check user is admin or not => In middleware
+    // 2. Get list of roles with pagination and search
+    const roles = await RoleModel.aggregate([
+      {
+        $unwind: "$rol_grants", // Unwind grants to flatten the array
+      },
+      {
+        $lookup: {
+          from: "Resources", // Assuming the collection name for resources is "resources"
+          localField: "rol_grants.resource",
+          foreignField: "_id",
+          as: "resource",
+        },
+      },
+      {
+        $unwind: "$resource", // Unwind the resource array
+      },
+      {
+        $project: {
+          _id: 0,
+          role: "$rol_name",
+          resource: "$resource.src_name", // Resource name
+          actions: "$rol_grants.actions", // Actions allowed on the resource
+          attributes: "$rol_grants.attributes", // Attributes that can be accessed or modified
+        },
+      },
+      {
+        $unwind: "$actions", // Unwind actions to flatten the array
+      },
+      {
+        $project: {
+          role: 1,
+          resource: 1,
+          action: "$actions", // Action name
+          attributes: 1, // Attributes that can be accessed or modified
+        },
+      },
+    ]);
+    return roles;
   } catch (error) {
     console.error("Error listing roles:", error);
     throw error; // Re-throw the error to be handled by the caller

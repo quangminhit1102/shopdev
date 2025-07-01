@@ -41,9 +41,7 @@ const userSchema = new Schema(
             required: true,
           }, // Actions allowed on the resource
         ],
-        attributes: [
-          { type: String, default: "*" }, // Attributes that can be accessed or modified
-        ],
+        attributes: { type: String, default: "*" }, // Attributes that can be accessed or modified
       },
     ], // Array of resources granted to the role
   },

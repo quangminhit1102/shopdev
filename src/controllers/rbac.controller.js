@@ -33,7 +33,10 @@ class RBACController {
   roleList = async (req, res) => {
     new OK({
       message: "Role list fetched successfully",
-      metadata: await RbacService.roleList(),
+      metadata: await RbacService.roleList({
+        userId: req.userId,
+        ...req.query,
+      }),
     }).send(res);
   };
 }
