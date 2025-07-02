@@ -40,6 +40,9 @@ const ReasonStatusCode = {
   INTERNAL_SERVER: "Internal Server Error",
 };
 
+const { request } = require("express");
+const myLogger = require("../loggers/mylogger.log");
+
 /**
  * @class ErrorResponse
  * @extends Error
@@ -51,6 +54,13 @@ class ErrorResponse extends Error {
   constructor(message, status) {
     super(message);
     this.status = status;
+
+    myLogger.error(this.message, {
+      context: "context",
+      requestId: "requestId",
+      message: this.message,
+      metadata: "metadata",
+    });
   }
 }
 
