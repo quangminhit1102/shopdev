@@ -2,6 +2,7 @@
 const { format } = require("morgan");
 const winston = require("winston");
 require("winston-daily-rotate-file");
+const { v4: uuidv4 } = require("uuid");
 
 class MyLogger {
   constructor() {
@@ -54,14 +55,31 @@ class MyLogger {
     });
   }
 
+  commonParams(params) {
+    let context, req, metadata;
+    if (!Array.isArray(params)) {
+      context = JSON.stringify(params);
+    } else {
+      [context, req, metadata] = params;
+    }
+
+    const requestId = req?.requestId || uuidv4().toString();
+    return {
+      requestId,
+      context,
+      metadata,
+    };
+  }
+
   log(message, params) {
-    const logObject = { message, ...params };
+    const paramsLog = this.commonParams(params);
+    const logObject = { message, ...paramsLog };
     this.logger.info(logObject);
   }
   error(message, params) {
-    const logObject = { message, ...params };
+    const paramsLog = this.commonParams(params);
+    const logObject = { message, ...paramsLog };
     this.logger.error(logObject);
-    console.error(message, params);
   }
 }
 
