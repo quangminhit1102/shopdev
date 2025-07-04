@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TOTP/HOTP Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom styles for Inter font */
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Hide the default number input arrows */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4"
+  >
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl space-y-8">
+      <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-8">
+        OTP Generator
+      </h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- TOTP Configuration Section -->
+        <div
+          class="bg-blue-50 p-6 rounded-lg shadow-inner border border-blue-200"
+        >
+          <h2 class="text-2xl font-bold text-blue-800 mb-6 text-center">
+            TOTP Configuration
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label
+                for="totpSecret"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Secret Key (Base32)</label
+              >
+              <input
+                type="text"
+                id="totpSecret"
+                value="mysecretkey"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                placeholder="e.g., JBSWY3DPEHPK3PXP"
+              />
+            </div>
+            <div>
+              <label
+                for="totpAlgorithm"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Algorithm</label
+              >
+              <select
+                id="totpAlgorithm"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option value="SHA-1">SHA-1</option>
+                <option value="SHA-256">SHA-256</option>
+                <option value="SHA-512">SHA-512</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="totpDigits"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Digits</label
+              >
+              <select
+                id="totpDigits"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              >
+                <option value="6">6</option>
+                <option value="8">8</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="totpTimeStep"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Time Step (seconds)</label
+              >
+              <input
+                type="number"
+                id="totpTimeStep"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                value="30"
+                min="1"
+              />
+            </div>
+            <button
+              id="generateTotp"
+              class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Generate TOTP
+            </button>
+            <div class="mt-4 text-center">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Generated TOTP:</label
+              >
+              <div
+                id="totpOutput"
+                class="text-4xl font-extrabold text-blue-700 bg-blue-100 p-4 rounded-lg border border-blue-300 select-all tracking-wider"
+              >
+                ---
+              </div>
+              <div id="totpTimer" class="text-sm text-gray-600 mt-2"></div>
+            </div>
+            <div
+              id="totpError"
+              class="text-red-600 text-sm mt-2 text-center"
+            ></div>
+          </div>
+        </div>
+
+        <!-- HOTP Configuration Section -->
+        <div
+          class="bg-green-50 p-6 rounded-lg shadow-inner border border-green-200"
+        >
+          <h2 class="text-2xl font-bold text-green-800 mb-6 text-center">
+            HOTP Configuration
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label
+                for="hotpSecret"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Secret Key (Base32)</label
+              >
+              <input
+                type="text"
+                id="hotpSecret"
+                value="mysecretkey"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm"
+                placeholder="e.g., JBSWY3DPEHPK3PXP"
+              />
+            </div>
+            <div>
+              <label
+                for="hotpAlgorithm"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Algorithm</label
+              >
+              <select
+                id="hotpAlgorithm"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm"
+              >
+                <option value="SHA-1">SHA-1</option>
+                <option value="SHA-256">SHA-256</option>
+                <option value="SHA-512">SHA-512</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="hotpDigits"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Digits</label
+              >
+              <select
+                id="hotpDigits"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm"
+              >
+                <option value="6">6</option>
+                <option value="8">8</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="hotpCounter"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Counter</label
+              >
+              <input
+                type="number"
+                id="hotpCounter"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 shadow-sm"
+                value="0"
+                min="0"
+              />
+            </div>
+            <button
+              id="generateHotp"
+              class="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              Generate HOTP
+            </button>
+            <div class="mt-4 text-center">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Generated HOTP:</label
+              >
+              <div
+                id="hotpOutput"
+                class="text-4xl font-extrabold text-green-700 bg-green-100 p-4 rounded-lg border border-green-300 select-all tracking-wider"
+              >
+                ---
+              </div>
+            </div>
+            <div
+              id="hotpError"
+              class="text-red-600 text-sm mt-2 text-center"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Utility Functions ---
+
+      /**
+       * Decodes a Base32 string into a Uint8Array.
+       * Implements RFC 4648 Base32 decoding.
+       * @param {string} base32 - The Base32 encoded string.
+       * @returns {Uint8Array} The decoded byte array.
+       * @throws {Error} If the input string is not a valid Base32 string.
+       */
+      function base32Decode(base32) {
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        const lookup = {};
+        for (let i = 0; i < alphabet.length; i++) {
+          lookup[alphabet[i]] = i;
+        }
+
+        // Remove padding characters and convert to uppercase for consistency
+        base32 = base32.toUpperCase().replace(/=/g, "");
+
+        let bits = "";
+        for (let i = 0; i < base32.length; i++) {
+          const char = base32[i];
+          if (!(char in lookup)) {
+            throw new Error("Invalid Base32 character: " + char);
+          }
+          bits += lookup[char].toString(2).padStart(5, "0");
+        }
+
+        // Pad bits to be a multiple of 8
+        while (bits.length % 8 !== 0) {
+          bits += "0";
+        }
+
+        const bytes = new Uint8Array(bits.length / 8);
+        for (let i = 0; i < bytes.length; i++) {
+          bytes[i] = parseInt(bits.substring(i * 8, (i + 1) * 8), 2);
+        }
+        return bytes;
+      }
+
+      /**
+       * Converts a number to a 8-byte (64-bit) Uint8Array.
+       * Used for HOTP counter and TOTP time step.
+       * @param {number} num - The number to convert.
+       * @returns {Uint8Array} The 8-byte representation.
+       */
+      function toBytes(num) {
+        const bytes = new Uint8Array(8);
+        for (let i = 7; i >= 0; i--) {
+          bytes[i] = num & 0xff;
+          num = Math.floor(num / 256);
+        }
+        return bytes;
+      }
+
+      /**
+       * Performs the OATH truncation function.
+       * @param {Uint8Array} hmacResult - The HMAC result (20 bytes for SHA-1, 32 for SHA-256, 64 for SHA-512).
+       * @param {number} digits - The number of digits for the OTP (6 or 8).
+       * @returns {string} The truncated OTP.
+       */
+      function oathTruncate(hmacResult, digits) {
+        const offset = hmacResult[hmacResult.length - 1] & 0xf;
+        const otp =
+          ((hmacResult[offset] & 0x7f) << 24) |
+          ((hmacResult[offset + 1] & 0xff) << 16) |
+          ((hmacResult[offset + 2] & 0xff) << 8) |
+          (hmacResult[offset + 3] & 0xff);
+
+        const mod = 10 ** digits;
+        return (otp % mod).toString().padStart(digits, "0");
+      }
+
+      /**
+       * Generates an HMAC-based One-Time Password (HOTP).
+       * @param {string} secretBase32 - The Base32 encoded secret key.
+       * @param {number} counter - The counter value.
+       * @param {number} digits - The number of digits for the OTP (6 or 8).
+       * @param {string} algorithm - The HMAC algorithm ('SHA-1', 'SHA-256', 'SHA-512').
+       * @returns {Promise<string>} The generated HOTP.
+       */
+      async function generateHotp(secretBase32, counter, digits, algorithm) {
+        try {
+          const keyBytes = base32Decode(secretBase32);
+          const counterBytes = toBytes(counter);
+
+          const key = await crypto.subtle.importKey(
+            "raw",
+            keyBytes,
+            { name: "HMAC", hash: { name: algorithm } },
+            false,
+            ["sign"]
+          );
+
+          const signature = await crypto.subtle.sign("HMAC", key, counterBytes);
+
+          const hmacResult = new Uint8Array(signature);
+          return oathTruncate(hmacResult, digits);
+        } catch (error) {
+          console.error("HOTP generation error:", error);
+          throw new Error("Failed to generate HOTP: " + error.message);
+        }
+      }
+
+      /**
+       * Generates a Time-based One-Time Password (TOTP).
+       * @param {string} secretBase32 - The Base32 encoded secret key.
+       * @param {number} timeStep - The time step in seconds (e.g., 30).
+       * @param {number} digits - The number of digits for the OTP (6 or 8).
+       * @param {string} algorithm - The HMAC algorithm ('SHA-1', 'SHA-256', 'SHA-512').
+       * @returns {Promise<string>} The generated TOTP.
+       */
+      async function generateTotp(secretBase32, timeStep, digits, algorithm) {
+        const epoch = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+        const counter = Math.floor(epoch / timeStep);
+        return generateHotp(secretBase32, counter, digits, algorithm);
+      }
+
+      // --- DOM Elements ---
+      const totpSecretInput = document.getElementById("totpSecret");
+      const totpAlgorithmSelect = document.getElementById("totpAlgorithm");
+      const totpDigitsSelect = document.getElementById("totpDigits");
+      const totpTimeStepInput = document.getElementById("totpTimeStep");
+      const generateTotpButton = document.getElementById("generateTotp");
+      const totpOutputDiv = document.getElementById("totpOutput");
+      const totpErrorDiv = document.getElementById("totpError");
+      const totpTimerDiv = document.getElementById("totpTimer");
+
+      const hotpSecretInput = document.getElementById("hotpSecret");
+      const hotpAlgorithmSelect = document.getElementById("hotpAlgorithm");
+      const hotpDigitsSelect = document.getElementById("hotpDigits");
+      const hotpCounterInput = document.getElementById("hotpCounter");
+      const generateHotpButton = document.getElementById("generateHotp");
+      const hotpOutputDiv = document.getElementById("hotpOutput");
+      const hotpErrorDiv = document.getElementById("hotpError");
+
+      // --- Event Listeners ---
+
+      generateTotpButton.addEventListener("click", async () => {
+        totpOutputDiv.textContent = "---"; // Reset output
+        totpErrorDiv.textContent = ""; // Clear previous errors
+        const secret = totpSecretInput.value.trim();
+        const algorithm = totpAlgorithmSelect.value;
+        const digits = parseInt(totpDigitsSelect.value, 10);
+        const timeStep = parseInt(totpTimeStepInput.value, 10);
+
+        if (!secret) {
+          totpErrorDiv.textContent = "Secret Key cannot be empty.";
+          return;
+        }
+        if (isNaN(timeStep) || timeStep <= 0) {
+          totpErrorDiv.textContent = "Time Step must be a positive number.";
+          return;
+        }
+
+        try {
+          const otp = await generateTotp(secret, timeStep, digits, algorithm);
+          totpOutputDiv.textContent = otp;
+        } catch (error) {
+          totpErrorDiv.textContent = error.message;
+        }
+      });
+
+      generateHotpButton.addEventListener("click", async () => {
+        hotpOutputDiv.textContent = "---"; // Reset output
+        hotpErrorDiv.textContent = ""; // Clear previous errors
+        const secret = hotpSecretInput.value.trim();
+        const algorithm = hotpAlgorithmSelect.value;
+        const digits = parseInt(hotpDigitsSelect.value, 10);
+        const counter = parseInt(hotpCounterInput.value, 10);
+
+        if (!secret) {
+          hotpErrorDiv.textContent = "Secret Key cannot be empty.";
+          return;
+        }
+        if (isNaN(counter) || counter < 0) {
+          hotpErrorDiv.textContent = "Counter must be a non-negative number.";
+          return;
+        }
+
+        try {
+          const otp = await generateHotp(secret, counter, digits, algorithm);
+          hotpOutputDiv.textContent = otp;
+          // Auto-increment counter for HOTP for convenience
+          hotpCounterInput.value = counter + 1;
+        } catch (error) {
+          hotpErrorDiv.textContent = error.message;
+        }
+      });
+
+      // --- TOTP Timer Update ---
+      function updateTotpTimer() {
+        const timeStep = parseInt(totpTimeStepInput.value, 10);
+        if (isNaN(timeStep) || timeStep <= 0) {
+          totpTimerDiv.textContent = "";
+          return;
+        }
+
+        const epoch = Math.floor(Date.now() / 1000);
+        const timeLeft = timeStep - (epoch % timeStep);
+        totpTimerDiv.textContent = `OTP refreshes in ${timeLeft} seconds`;
+
+        if (timeLeft === timeStep) {
+          // Just refreshed or new interval started
+          generateTotpButton.click(); // Automatically generate new TOTP
+        }
+      }
+
+      // Update timer every second
+      setInterval(updateTotpTimer, 1000);
+      // Initial call to set up the timer display and generate first TOTP
+      updateTotpTimer();
+
+      // Initial generation on load for TOTP
+      window.onload = () => {
+        generateTotpButton.click();
+      };
+    </script>
+  </body>
+</html>
