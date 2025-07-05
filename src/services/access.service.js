@@ -99,7 +99,7 @@ class AccessService {
    */
   static async refresh({ refreshToken }) {
     // 1. Find key by used refresh token => Prevent replay attack
-    var foundKey = await KeyTokenService.findKeyByUsedRefreshToken(
+    const foundKey = await KeyTokenService.findKeyByUsedRefreshToken(
       refreshToken
     );
 
@@ -118,7 +118,7 @@ class AccessService {
     }
 
     // 4. Find key store by refresh token
-    var keyStore = await KeyTokenService.findKeyByRefreshToken(refreshToken);
+    const keyStore = await KeyTokenService.findKeyByRefreshToken(refreshToken);
     if (!keyStore) {
       throw new AuthFailureError("Unauthorized");
     }
@@ -143,8 +143,10 @@ class AccessService {
 
     // 8. Save new refresh token to database
     await keyStore.updateOne({
-      $set: { refreshToken: tokens.refreshToken },
-      $set: { token: tokens.token },
+      $set: { 
+        refreshToken: tokens.refreshToken,
+        token: tokens.token
+      },
       $addToSet: { refreshTokensUsed: refreshToken },
     });
 
