@@ -41,7 +41,7 @@ const ReasonStatusCode = {
 };
 
 const { request } = require("express");
-const myLogger = require("../loggers/mylogger.log");
+// const myLogger = require("../loggers/mylogger.log");
 
 /**
  * @class ErrorResponse
@@ -54,13 +54,14 @@ class ErrorResponse extends Error {
   constructor(message, status) {
     super(message);
     this.status = status;
+    this.now = Date.now();
 
-    myLogger.error(this.message, {
-      context: "context",
-      requestId: "requestId",
-      message: this.message,
-      metadata: "metadata",
-    });
+    // myLogger.error(this.message, {
+    //   context: "context",
+    //   requestId: "requestId",
+    //   message: this.message,
+    //   metadata: "metadata",
+    // });
   }
 }
 

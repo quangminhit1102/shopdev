@@ -5,9 +5,11 @@ const morgan = require("morgan");
 const { default: helmet } = require("helmet");
 const compression = require("compression");
 const cors = require("cors");
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./configs/swagger');
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./configs/swagger");
 const errorHandler = require("./middlewares/errorHandler");
+const { v4: uuidv4 } = require("uuid");
+const myLogger = require("./loggers/mylogger.log");
 
 // Security HTTP headers
 app.use(helmet());
@@ -23,7 +25,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 
 // Swagger documentation route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Middleware to generate and set a unique request ID
+// This can be useful for tracing requests in logs
+app.use((req, res, next) => {
+  const requestId = req.headers["x-request-id"] || uuidv4();
+  res.setHeader("x-request-id", requestId);
+  req.requestId = requestId; // Attach request ID to the request object
+
+  myLogger.log(
+    `Input params::${req.method} ${req.originalUrl} - Request ID: ${requestId}`,
+    [
+      req.path, // Path of the request
+      {
+        requestId: requestId, // Unique request ID
+      },
+      req.method === "POST" ? req.body : req.query, // Body for POST requests, query for GET requests
+    ]
+  );
+
+  next();
+
+  
+});
 
 // Initialize database
 require("./dbs/init.mongodb");
