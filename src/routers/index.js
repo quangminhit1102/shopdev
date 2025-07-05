@@ -46,4 +46,7 @@ router.use("/shopdev/profile", require("./profile"));
 // RBAC router
 router.use("/shopdev", require("./rbac"));
 
+// Template router
+router.use("/shopdev/template", require("./template.router"));
+
 module.exports = router;
