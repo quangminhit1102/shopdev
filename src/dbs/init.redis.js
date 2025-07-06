@@ -3,7 +3,7 @@
 const redis = require("redis");
 
 // Using a single, global client instance
-let redisClientInstance = null;
+let redisClientInstance = null, connectionTimeout;
 
 // Event names for Redis client
 const REDIS_EVENT = {
@@ -14,6 +14,22 @@ const REDIS_EVENT = {
     READY: 'ready' // Add 'ready' for when the client is fully ready for operations
 };
 
+const REDIS_CONNECT_TIMEOUT = 10000;
+const REDIS_CONNECT_TIMEOUT_MESSAGE = {
+    error: 'Redis: Connection timeout',
+    message:{
+        vn: 'Redis: Kết nối timeout',
+        en: 'Redis: Connection timeout'
+    }
+}
+
+const handleRedisConnectionTimeout = () => {
+    connectionTimeout = setTimeout(() => {
+        console.log(REDIS_CONNECT_TIMEOUT_MESSAGE.error);
+        throw new Error(REDIS_CONNECT_TIMEOUT_MESSAGE.message.en);
+    }, REDIS_CONNECT_TIMEOUT);
+}
+
 /**
  * Handles various events emitted by the Redis client connection.
  * @param {redis.RedisClient} client - The Redis client instance.
@@ -21,18 +37,21 @@ const REDIS_EVENT = {
 const handleRedisConnectionEvents = (client) => {
     client.on(REDIS_EVENT.CONNECTED, () => {
         console.log('Redis: Connected!');
+        clearTimeout(connectionTimeout);
     });
     client.on(REDIS_EVENT.READY, () => {
         console.log('Redis: Client is ready for operations.');
     });
     client.on(REDIS_EVENT.ERROR, (err) => {
-        console.error('Redis: Connection error:', err.message || err);
+        // console.error('Redis: Connection error:', err.message || err);
+        handleRedisConnectionTimeout()
     });
     client.on(REDIS_EVENT.END, () => {
         console.log('Redis: Connection ended.');
+        handleRedisConnectionTimeout()
     });
-    client.on(REDIS_EVENT.RECONNECTING, (delay, attempt) => {
-        console.log(`Redis: Reconnecting... (attempt: ${attempt}, delay: ${delay}ms)`);
+    client.on(REDIS_EVENT.RECONNECTING, () => {
+        console.warn(`Redis: Reconnecting...`);
     });
 };
 
@@ -99,3 +118,16 @@ module.exports = {
     getRedisClient, // Renamed for clarity
     closeRedis,
 };
+
+
+
+// docker run --name my-redis -d -p 6379:6379 redis
+// docker ps
+// docker exec -it my-redis redis-cli
+// redis-cli
+// set key value
+// get key
+// del key
+// keys *
+// flushall
+
