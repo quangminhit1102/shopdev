@@ -15,7 +15,6 @@ const {
   ForbiddenError,
   AuthFailureError,
 } = require("../core/error.response");
-const { CREATED, OK } = require("../core/success.response");
 
 class AccessService {
   /**
@@ -143,9 +142,9 @@ class AccessService {
 
     // 8. Save new refresh token to database
     await keyStore.updateOne({
-      $set: { 
+      $set: {
         refreshToken: tokens.refreshToken,
-        token: tokens.token
+        token: tokens.token,
       },
       $addToSet: { refreshTokensUsed: refreshToken },
     });
@@ -296,8 +295,8 @@ class AccessService {
         throw new InternalServerError("Failed to save public key");
       }
 
-      log(`token: ${token}`);
-      log(`refreshToken: ${refreshToken}`);
+      // log(`token: ${token}`);
+      // log(`refreshToken: ${refreshToken}`);
 
       // Send verification email
       // Implement email sending logic here
