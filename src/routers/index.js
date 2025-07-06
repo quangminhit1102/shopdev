@@ -49,4 +49,7 @@ router.use("/shopdev", require("./rbac"));
 // Template router
 router.use("/shopdev/template", require("./template.router"));
 
+// User router
+router.use("/shopdev/user", require("./user"));
+
 module.exports = router;
