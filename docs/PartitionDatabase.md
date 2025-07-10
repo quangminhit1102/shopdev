@@ -5,7 +5,7 @@ This guide covers database partitioning (for SQL) and sharding (for NoSQL), whic
 
 ---
 
-## Why Partition or Shard? 🤔
+## Why Partition or Shard? 
 
 - **Improved Query Performance**: Queries can scan only relevant partitions/shards instead of the entire dataset, leading to significantly faster data retrieval.
 - **Enhanced Manageability**: Maintenance tasks (backups, index rebuilding) can be performed on individual pieces, reducing the impact on the overall system.
