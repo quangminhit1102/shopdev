@@ -6,6 +6,7 @@ const { Schema } = require("mongoose");
 
 const productSchema = new Schema(
   {
+    product_id: { type: String, default: "" },
     product_name: {
       type: String,
       required: true,
@@ -26,10 +27,15 @@ const productSchema = new Schema(
     product_quantity: {
       type: Number,
     },
-    product_type: {
-      type: String,
+    // product_type: {
+    //   type: String,
+    //   required: true,
+    //   enum: ["Electronics", "Clothing", "Furniture"],
+    // },
+    product_categories: {
+      type: Array,
       required: true,
-      enum: ["Electronics", "Clothing", "Furniture"],
+      default: [],
     },
     product_shop: {
       type: Schema.Types.ObjectId,
@@ -93,7 +99,10 @@ const productSchema = new Schema(
       index: true, // Create an index for faster queries
       select: false, // Do not include in queries by default
     },
-    isDeleted
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, collection: COLLECTION_NAME }
 );
