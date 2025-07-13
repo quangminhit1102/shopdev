@@ -18,6 +18,8 @@ const errorHandler = (err, req, res, next) => {
     ]
   );
 
+  console.log(err.stack);
+
   const message = err.message || "Internal Server Error";
   res.status(status).json({
     message,

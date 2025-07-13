@@ -46,13 +46,11 @@ app.use((req, res, next) => {
   );
 
   next();
-
-  
 });
 
 // Initialize database
 require("./dbs/init.mongodb");
-require("./dbs/init.redis").initRedis();
+// require("./dbs/init.redis").initRedis();
 
 // Initialize routes
 app.use("/", require("./routers"));
