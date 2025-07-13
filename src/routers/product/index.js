@@ -20,7 +20,11 @@ router.get(
   asyncHandler(ProductController.findAllPublishedProductsOfShop)
 );
 
+// Create Product
 router.post("/create", asyncHandler(ProductController.createProduct));
+
+// Create SPU
+router.post("/create-spu", asyncHandler(ProductController.createSPU));
 
 router.patch("/:product_id", asyncHandler(ProductController.updateProduct));
 

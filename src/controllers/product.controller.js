@@ -5,6 +5,7 @@
 
 const { ProductStrategy } = require("../services/product.service");
 const { CREATED, OK } = require("../core/success.response");
+const { newSPU } = require("../services/spu.service");
 
 /**
  * @swagger
@@ -403,6 +404,51 @@ class ProductController {
         product_shop: req.user?._id,
       }),
     }).send(res);
+  };
+
+  /**
+   * @swagger
+   * /shopdev/product/create-spu:
+   *   post:
+   *     summary: Create a new SPU (Standard Product Unit)
+   *     tags: [Products]
+   *     security:
+   *       - BearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *     responses:
+   *       201:
+   *         description: SPU created successfully
+   *       400:
+   *         description: Invalid input
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: Shop not found
+   *       500:
+   *         description: Server error
+   */
+  createSPU = async (req, res, next) => {
+    try {
+      const result = await newSPU({
+        ...req.body,
+        product_shop: req.user?._id,
+      });
+      if (result) {
+        new CREATED({
+          message: "SPU created successfully!",
+          metadata: result,
+        }).send(res);
+      } else {
+        res.status(400).json({ message: "Failed to create SPU" });
+      }
+    } catch (error) {
+      next(error);
+    }
   };
 }
 

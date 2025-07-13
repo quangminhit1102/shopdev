@@ -1,10 +1,10 @@
 "use strict";
 
-const DOCUMENT_NAME = "Product";
-const COLLECTION_NAME = "Products";
-const { Schema } = require("mongoose");
+const DOCUMENT_NAME = "spu";
+const COLLECTION_NAME = "spus";
+const { Schema, model } = require("mongoose");
 
-const productSchema = new Schema(
+const spuSchema = new Schema(
   {
     product_id: { type: String, default: "" },
     product_name: {
@@ -108,7 +108,7 @@ const productSchema = new Schema(
 );
 
 // Create a text index for full-text search for product_name and product_description
-productSchema.index({ product_name: "text", product_description: "text" });
+spuSchema.index({ product_name: "text", product_description: "text" });
 
 // Add a slug before saving the product
 // productSchema.pre("save", function (next) {
@@ -121,7 +121,7 @@ productSchema.index({ product_name: "text", product_description: "text" });
 // using slugify to create a slug from the product name
 const slugify = require("slugify");
 // Add a slug before saving the product
-productSchema.pre("save", function (next) {
+spuSchema.pre("save", function (next) {
   // Check if the product_name field has been modified
   if (this.isModified("product_name")) {
     this.product_slug = slugify(this.product_name, {
@@ -132,4 +132,4 @@ productSchema.pre("save", function (next) {
   next();
 });
 
-module.exports = model(DOCUMENT_NAME, productSchema);
+module.exports = model(DOCUMENT_NAME, spuSchema);

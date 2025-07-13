@@ -1,6 +1,6 @@
 "use strict";
 
-const DOCUMENT_NAME = "Sku";
+const DOCUMENT_NAME = "sku";
 const COLLECTION_NAME = "skus";
 const { Schema, model, Types } = require("mongoose");
 
@@ -9,7 +9,7 @@ const skuSchema = new Schema(
     sku_id: { type: String, required: true, unique: true }, // string "{spu_id}123456-{shop_id}"
     sku_tier_idx: {
       type: Array,
-      default: [0],
+      default: [0, 0],
     },
     /*
       color = [red, green] = [0, 1]
