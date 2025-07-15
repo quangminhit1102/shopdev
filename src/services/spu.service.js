@@ -150,6 +150,7 @@ const newSPU = async ({
   // If 'spu' is a falsy value (e.g., creation failed and 'spu' is null or undefined), it returns false.
   return !!spu;
 };
+
 module.exports = {
   newSPU,
 };
