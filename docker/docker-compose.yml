@@ -8,6 +8,11 @@ services:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
       - discovery.type=single-node
+
+      ## Basic Auth
+      # - xpack.security.enabled=true
+      ## default username is: elastic
+      # - ELASTIC_PASSWORD=changeme
     ulimits:
       memlock:
         soft: -1
@@ -29,7 +34,6 @@ services:
 volumes:
   esdata:
     driver: local
-
 # run: docker-compose up -d
-# stop: docker-compose down 
+# stop: docker-compose down
 
