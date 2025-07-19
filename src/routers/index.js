@@ -6,9 +6,13 @@ const access = require("./access");
 const product = require("./product");
 const discount = require("./discount");
 const comment = require("./comment");
+const elasticsearch = require("./elasticsearch");
 
 // Middleware to check API key
 // router.use(require("../auth/checkAuth"));
+
+// elasticsearch
+router.use("/elasticsearch", elasticsearch);
 
 // Comment router
 router.use("/shopdev/comment", comment);
