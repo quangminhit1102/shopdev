@@ -10,5 +10,31 @@ const deleteIndex = async (indexName) => {
   console.log("Index deleted");
 };
 
-deleteIndex("posts");
-createIndex("posts");
+const createMapping = async (indexName) => {
+  await elasticClient.indices.putMapping({
+    index: indexName,
+    body: {
+      properties: {
+        title: { type: "text" },    // "text" type is full-text searchable
+        content: { type: "text" },  // "text" type is full-text searchable
+        author: { type: "keyword" }, // "keyword" for exact matches
+      },
+    },
+  });
+  console.log("Mapping created");
+};
+
+const recreateIndexWithMapping = async (indexName) => {
+  try {
+    await deleteIndex(indexName);
+  } catch (err) {
+    if (err?.meta?.body?.error?.type !== "index_not_found_exception") {
+      throw err;
+    }
+    // Ignore if index does not exist
+  }
+  await createIndex(indexName);
+  await createMapping(indexName);
+  console.log("Index recreated with mapping");
+};
+recreateIndexWithMapping("posts").catch(console.error);
