@@ -1,28 +1,27 @@
 "use strict";
 
 const elasticClient = require("../dbs/elastic-client");
+const { OK, CREATED } = require("./../core/success.response");
 
 class ElasticsearchController {
-  /**
-   * Redirect to homepage
-   */
-  home = async (req, res) => {
-    res.redirect("http://localhost:3000/");
-  };
-
   /**
    * Create a new post in Elasticsearch
    */
   createPost = async (req, res) => {
     const result = await elasticClient.index({
       index: "posts",
-      document: {
-        title: req.body.title,
-        author: req.body.author,
-        content: req.body.content,
+      body: {
+        document: {
+          title: req.body.title,
+          author: req.body.author,
+          content: req.body.content,
+        },
       },
     });
-    res.send(result);
+    new CREATED({
+      message: "Create successfully",
+      metadata: result?.body || [],
+    }).send(res);
   };
 
   /**
@@ -31,31 +30,92 @@ class ElasticsearchController {
   removePost = async (req, res) => {
     const result = await elasticClient.delete({
       index: "posts",
-      id: req.query.id,
+      id: req.params.id,
     });
-    res.json(result);
+    new OK({
+      message: "Remove successfully",
+      metadata: result?.body || [],
+    }).send(res);
   };
 
   /**
-   * Search posts using fuzzy matching
+   * Search posts
    */
   searchPosts = async (req, res) => {
-    const result = await elasticClient.search({
-      index: "posts",
-      query: { fuzzy: { title: req.query.query } },
-    });
-    res.json(result);
+    try {
+      const result = await elasticClient.search({
+        index: "posts",
+        body: {
+          query: {
+            match: {
+              title: req.query.search,
+            },
+          },
+        },
+      });
+
+      new OK({
+        message: "Search",
+        metadata: result?.body?.hits?.hits || [],
+      }).send(res);
+    } catch (error) {
+      console.error("Error searching posts:", error);
+      // Handle error appropriately
+    }
+  };
+
+  /**
+   * Update a post in Elasticsearch
+   */
+  updatePost = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, author, content } = req.body;
+      const result = await elasticClient.update({
+        index: "posts",
+        id,
+        body: {
+          doc: {
+            ...(title && { title }),
+            ...(author && { author }),
+            ...(content && { content }),
+          },
+        },
+      });
+      new OK({
+        message: "Update successfully",
+        metadata: result?.body || [],
+      }).send(res);
+    } catch (error) {
+      console.error("Error updating post:", error);
+      res
+        .status(500)
+        .json({ message: "Error updating post", error: error.message });
+    }
   };
 
   /**
    * Get all posts
    */
   getAllPosts = async (req, res) => {
-    const result = await elasticClient.search({
-      index: "posts",
-      query: { match_all: {} },
-    });
-    res.send(result);
+    try {
+      const result = await elasticClient.search({
+        index: "posts",
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      new OK({
+        message: "Search",
+        metadata: result?.body?.hits?.hits || [],
+      }).send(res);
+    } catch (error) {
+      console.error("Error searching posts:", error);
+      // Handle error appropriately
+    }
   };
 }
 
