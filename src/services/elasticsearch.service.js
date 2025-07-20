@@ -15,8 +15,24 @@ const createMapping = async (indexName) => {
     index: indexName,
     body: {
       properties: {
-        title: { type: "text" },    // "text" type is full-text searchable
-        content: { type: "text" },  // "text" type is full-text searchable
+        title: {
+          type: "text",
+          fields: {
+            keyword: {
+              type: "keyword",
+              ignore_above: 256,
+            },
+          },
+        }, // "text" type is full-text searchable
+        content: {
+          type: "text",
+          fields: {
+            keyword: {
+              type: "keyword",
+              ignore_above: 256,
+            },
+          },
+        }, // "text" type is full-text searchable
         author: { type: "keyword" }, // "keyword" for exact matches
       },
     },
@@ -34,7 +50,7 @@ const recreateIndexWithMapping = async (indexName) => {
     // Ignore if index does not exist
   }
   await createIndex(indexName);
-  await createMapping(indexName);
+  // await createMapping(indexName);
   console.log("Index recreated with mapping");
 };
-recreateIndexWithMapping("posts").catch(console.error);
+recreateIndexWithMapping("post_v001").catch(console.error);

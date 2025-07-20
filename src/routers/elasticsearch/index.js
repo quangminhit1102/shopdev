@@ -11,7 +11,7 @@ router.get("/posts", asyncHandler(ElasticsearchController.getAllPosts));
 router.post("/posts", asyncHandler(ElasticsearchController.createPost));
 
 // Search functionality
-router.get("/posts/search", asyncHandler(ElasticsearchController.searchPosts));
+router.post("/posts/search", asyncHandler(ElasticsearchController.searchPosts));
 
 // Get post by id
 router.get("/posts/:id", asyncHandler(ElasticsearchController.removePost));

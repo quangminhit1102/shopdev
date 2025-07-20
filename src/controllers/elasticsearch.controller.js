@@ -9,7 +9,7 @@ class ElasticsearchController {
    */
   createPost = async (req, res) => {
     const result = await elasticClient.index({
-      index: "posts",
+      index: "post_v001",
       body: {
         document: {
           title: req.body.title,
@@ -29,7 +29,7 @@ class ElasticsearchController {
    */
   removePost = async (req, res) => {
     const result = await elasticClient.delete({
-      index: "posts",
+      index: "post_v001",
       id: req.params.id,
     });
     new OK({
@@ -40,15 +40,26 @@ class ElasticsearchController {
 
   /**
    * Search posts
+   * {
+        "query": {
+          "simple_query_string": {
+            "query": "search text",
+            "default_operator": "OR",
+            "analyze_wildcard": true
+          }
+        }
+      }
    */
   searchPosts = async (req, res) => {
     try {
       const result = await elasticClient.search({
-        index: "posts",
+        index: "post_v001",
         body: {
           query: {
-            match: {
-              title: req.query.search,
+            simple_query_string: {
+              query: req.query.q || "",
+              default_operator: "OR",
+              analyze_wildcard: true,
             },
           },
         },
@@ -72,7 +83,7 @@ class ElasticsearchController {
       const { id } = req.params;
       const { title, author, content } = req.body;
       const result = await elasticClient.update({
-        index: "posts",
+        index: "post_v001",
         id,
         body: {
           doc: {
@@ -100,7 +111,7 @@ class ElasticsearchController {
   getAllPosts = async (req, res) => {
     try {
       const result = await elasticClient.search({
-        index: "posts",
+        index: "post_v001",
         body: {
           query: {
             match_all: {},
