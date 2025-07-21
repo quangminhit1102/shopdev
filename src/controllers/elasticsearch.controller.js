@@ -40,15 +40,6 @@ class ElasticsearchController {
 
   /**
    * Search posts
-   * {
-        "query": {
-          "simple_query_string": {
-            "query": "search text",
-            "default_operator": "OR",
-            "analyze_wildcard": true
-          }
-        }
-      }
    */
   searchPosts = async (req, res) => {
     try {
@@ -126,6 +117,75 @@ class ElasticsearchController {
     } catch (error) {
       console.error("Error searching posts:", error);
       // Handle error appropriately
+    }
+  };
+
+  /**
+   * Bulk operation for posts
+   * @example Request body:
+   * {
+   *   "operations": [
+   *     { "index": { "title": "Post 1", "author": "John", "content": "Content 1" }},
+   *     { "update": { "id": "123", "doc": { "title": "Updated Post" }}},
+   *     { "delete": { "id": "456" }}
+   *   ]
+   * }
+   */
+  bulkPosts = async (req, res) => {
+    try {
+      const { operations } = req.body;
+
+      if (!operations || !Array.isArray(operations)) {
+        return res.status(400).json({ message: "Invalid operations array" });
+      }
+
+      // Prepare bulk operations
+      const body = [];
+      operations.forEach((operation) => {
+        if (operation.index) {
+          // Index operation
+          body.push({ index: { _index: "post_v001" } });
+          body.push(operation.index);
+        } else if (operation.update) {
+          // Update operation
+          body.push({
+            update: {
+              _index: "post_v001",
+              _id: operation.update.id,
+            },
+          });
+          body.push({ doc: operation.update.doc });
+        } else if (operation.delete) {
+          // Delete operation
+          body.push({
+            delete: {
+              _index: "post_v001",
+              _id: operation.delete.id,
+            },
+          });
+        }
+      });
+
+      if (body.length === 0) {
+        return res.status(400).json({ message: "No valid operations found" });
+      }
+
+      const result = await elasticClient.bulk({ body });
+
+      new OK({
+        message: "Bulk operation completed successfully",
+        metadata: {
+          took: result.body?.took,
+          errors: result.body?.errors,
+          items: result.body?.items || [],
+        },
+      }).send(res);
+    } catch (error) {
+      console.error("Error in bulk operation:", error);
+      res.status(500).json({
+        message: "Error performing bulk operation",
+        error: error.message,
+      });
     }
   };
 }

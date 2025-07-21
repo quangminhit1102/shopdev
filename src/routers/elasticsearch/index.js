@@ -19,4 +19,10 @@ router.get("/posts/:id", asyncHandler(ElasticsearchController.removePost));
 // Delete post by id
 router.delete("/posts/:id", asyncHandler(ElasticsearchController.removePost));
 
+// Update post by id
+router.patch("/posts/:id", asyncHandler(ElasticsearchController.updatePost));
+
+// Bulk operations
+router.post("/posts/bulk", asyncHandler(ElasticsearchController.bulkPosts));
+
 module.exports = router;

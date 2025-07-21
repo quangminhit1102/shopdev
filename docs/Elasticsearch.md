@@ -99,6 +99,15 @@ DELETE /products/_doc/1
 
 ### 3. Search Operations
 
+#### 3.1 Simple Search Examples
+
+**Query String Search:**
+
+```bash
+GET /products/_search?q=title:123    # Search in title field
+GET /products/_search?q=*:*          # Match all documents
+```
+
 **Basic Search:**
 
 ```bash
@@ -107,6 +116,139 @@ GET /products/_search
   "query": {
     "match": {
       "name": "iPhone"
+    }
+  }
+}
+```
+
+#### 3.2 Advanced Search Examples
+
+**Match All with Sorting and Field Selection:**
+
+```bash
+GET /products/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "from": 0,
+  "size": 10,
+  "sort": {
+    "price": {
+      "order": "desc"
+    }
+  },
+  "_source": ["title", "price"]
+}
+```
+
+**Match with Field Selection:**
+
+```bash
+GET /products/_search
+{
+  "query": {
+    "match": {
+      "title": "ip 16"
+    }
+  },
+  "from": 0,
+  "size": 1,
+  "_source": ["title", "price"]
+}
+```
+
+**Bool Query with Multiple Conditions:**
+
+```bash
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": "ip 161111"
+          }
+        },
+        {
+          "match": {
+            "price": 1000
+          }
+        }
+      ],
+      "filter": {
+        "range": {
+          "price": {
+            "gt": 500
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**Exact Match with Highlighting:**
+
+```bash
+GET /products/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": "ip 16 128 GB"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "title": {}
+    }
+  }
+}
+```
+
+#### 3.3 Aggregation Examples
+
+**Group by Field:**
+
+```bash
+GET /products/_search
+{
+  "aggs": {
+    "price_group": {
+      "terms": {
+        "field": "price"
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+**Average of Field:**
+
+```bash
+GET /products/_search
+{
+  "aggs": {
+    "price_group": {
+      "avg": {
+        "field": "price"
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+**Match Phrase Query:**
+
+```bash
+GET /products/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": "123456"
     }
   }
 }
@@ -391,10 +533,18 @@ POST /_security/role/product_reader
 - **Slow queries**: Check mappings and query structure
 - **Split brain**: Configure discovery settings properly
 
-### Useful Debug Commands:
+**Quick Answer: What Happens? When you delete then update in the same bulk operation**
+❌ DELETE → UPDATE (without upsert):
+Delete: ✅ Success - document deleted
+Update: ❌ Fails with document_missing_exception
+Result: Document remains deleted
 
-```bash
-GET /_cat/allocation?v
-GET /_cat/shards?v
-GET /_cluster/allocation/explain
-```
+✅ DELETE → UPDATE (with upsert):
+Delete: ✅ Success - document deleted
+Update: ✅ Success - document recreated via upsert
+Result: New document exists with upserted content
+
+✅ DELETE → INDEX:
+Delete:✅ Success - document deleted
+Index: ✅ Success - new document created
+Result: Document completely replaced
