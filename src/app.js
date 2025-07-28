@@ -50,7 +50,19 @@ app.use((req, res, next) => {
 
 // Initialize database
 require("./dbs/init.mongodb");
+
+// // Initialize Elasticsearch client
+// require("./dbs/elastic-client");
+
+// // Initialize Redis client
 // require("./dbs/init.redis").initRedis();
+
+// Initialize ioredis client
+require("./dbs/init.ioredis").initRedis({
+  IOREDIS_IS_ENABLED: process.env.IOREDIS_IS_ENABLED || true,
+  IOREDIS_HOST: process.env.IOREDIS_HOST || "localhost",
+  IOREDIS_PORT: process.env.IOREDIS_PORT || 6379,
+});
 
 // Initialize routes
 app.use("/", require("./routers"));

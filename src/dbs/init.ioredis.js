@@ -1,144 +1,227 @@
 "use strict";
 
-const redis = require("ioredis");
+const IORedis = require("ioredis");
 
-// Using a single, global client instance
-let redisClientInstance = null,
-  connectionTimeout;
+/**
+ * Constants and Configuration
+ */
+const REDIS_CONFIG = {
+  DEFAULT_HOST: "localhost",
+  DEFAULT_PORT: 6379,
+  CONNECT_TIMEOUT: 10000, // 10 seconds
+};
 
-// Event names for Redis client
-const REDIS_EVENT = {
+const REDIS_EVENTS = {
   CONNECTED: "connect",
   ERROR: "error",
   END: "end",
   RECONNECTING: "reconnecting",
-  READY: "ready", // Add 'ready' for when the client is fully ready for operations
+  READY: "ready",
 };
 
-const REDIS_CONNECT_TIMEOUT = 10000;
-const REDIS_CONNECT_TIMEOUT_MESSAGE = {
-  error: "Redis: Connection timeout",
-  message: {
-    vn: "Redis: Kết nối timeout",
-    en: "Redis: Connection timeout",
+const REDIS_MESSAGES = {
+  TIMEOUT: {
+    error: "Redis: Connection timeout",
+    message: {
+      en: "Redis: Connection timeout",
+      vn: "Redis: Kết nối timeout",
+    },
+  },
+  INITIALIZATION: {
+    ALREADY_INITIALIZED:
+      "Redis: Client already initialized. Returning existing instance.",
+    NOT_INITIALIZED:
+      "Redis: Client has not been initialized yet. Call initRedis() first.",
+    FAILED: "Redis: Failed to initialize and connect:",
+  },
+  CONNECTION: {
+    CONNECTED: "IORedis: Connected!",
+    READY: "IORedis: Client is ready for operations.",
+    ENDED: "IORedis: Connection ended.",
+    RECONNECTING: "IORedis: Reconnecting...",
+    CLOSED: "Redis: Connection gracefully closed.",
+    NO_ACTIVE: "Redis: No active connection to close.",
+    CLOSE_ERROR: "Redis: Error closing connection:",
   },
 };
 
+// Global instance for singleton pattern
+let redisClientInstance = null;
+let connectionTimeout;
+
+/**
+ * Sets up a connection timeout that throws an error if Redis fails to connect within the specified time.
+ * @private
+ */
 const handleRedisConnectionTimeout = () => {
   connectionTimeout = setTimeout(() => {
-    console.log(REDIS_CONNECT_TIMEOUT_MESSAGE.error);
-    throw new Error(REDIS_CONNECT_TIMEOUT_MESSAGE.message.en);
-  }, REDIS_CONNECT_TIMEOUT);
+    console.log(REDIS_MESSAGES.TIMEOUT.error);
+    throw new Error(REDIS_MESSAGES.TIMEOUT.message.en);
+  }, REDIS_CONFIG.CONNECT_TIMEOUT);
 };
 
 /**
- * Handles various events emitted by the Redis client connection.
- * @param {redis.RedisClient} client - The Redis client instance.
+ * Attaches event handlers to the Redis client for monitoring connection status.
+ * @private
+ * @param {IORedis.Redis} client - The Redis client instance.
  */
-const handleRedisConnectionEvents = (client) => {
-  client.on(REDIS_EVENT.CONNECTED, () => {
-    console.log("Redis: Connected!");
-    clearTimeout(connectionTimeout);
-  });
-  client.on(REDIS_EVENT.READY, () => {
-    console.log("Redis: Client is ready for operations.");
-  });
-  client.on(REDIS_EVENT.ERROR, (err) => {
-    // console.error('Redis: Connection error:', err.message || err);
-    handleRedisConnectionTimeout();
-  });
-  client.on(REDIS_EVENT.END, () => {
-    console.log("Redis: Connection ended.");
-    handleRedisConnectionTimeout();
-  });
-  client.on(REDIS_EVENT.RECONNECTING, () => {
-    console.warn(`Redis: Reconnecting...`);
+const setupRedisEventHandlers = (client) => {
+  if (!client) {
+    throw new Error("Redis client is required for event handling setup");
+  }
+
+  const eventHandlers = {
+    [REDIS_EVENTS.CONNECTED]: () => {
+      console.log(REDIS_MESSAGES.CONNECTION.CONNECTED);
+      clearTimeout(connectionTimeout);
+    },
+    [REDIS_EVENTS.READY]: () => {
+      console.log(REDIS_MESSAGES.CONNECTION.READY);
+    },
+    [REDIS_EVENTS.ERROR]: () => {
+      handleRedisConnectionTimeout();
+    },
+    [REDIS_EVENTS.END]: () => {
+      console.log(REDIS_MESSAGES.CONNECTION.ENDED);
+      handleRedisConnectionTimeout();
+    },
+    [REDIS_EVENTS.RECONNECTING]: () => {
+      console.warn(REDIS_MESSAGES.CONNECTION.RECONNECTING);
+    },
+  };
+
+  // Attach all event handlers to the client
+  Object.entries(eventHandlers).forEach(([event, handler]) => {
+    client.on(event, handler);
   });
 };
 
 /**
- * Initializes and connects to the Redis server.
- * Ensures only one client instance is created.
- * @param {object} [options={}] - Options for the Redis client (e.g., { url: 'redis://localhost:6379' }).
+ * Interface for Redis client initialization options
+ * @typedef {Object} RedisOptions
+ * @property {boolean} [isEnabled=true] - Whether Redis should be enabled
+ * @property {string} [host=REDIS_CONFIG.DEFAULT_HOST] - Redis server host
+ * @property {number} [port=REDIS_CONFIG.DEFAULT_PORT] - Redis server port
+ */
+
+/**
+ * Initializes and connects to the Redis server using the singleton pattern.
+ * @param {RedisOptions} options - Configuration options for Redis
+ * @returns {Promise<IORedis.Redis|null>} The Redis client instance
+ * @throws {Error} If connection fails
  */
 const initRedis = async ({
-  IOREDIS_IS_ENABLED = true,
-  IOREDIS_HOST = "localhost",
-  IOREDIS_PORT = 6379,
-}) => {
+  isEnabled = true,
+  host = REDIS_CONFIG.DEFAULT_HOST,
+  port = REDIS_CONFIG.DEFAULT_PORT,
+} = {}) => {
+  // Return existing instance if already initialized
   if (redisClientInstance) {
-    console.log(
-      "Redis: Client already initialized. Returning existing instance."
-    );
+    console.log(REDIS_MESSAGES.INITIALIZATION.ALREADY_INITIALIZED);
     return redisClientInstance;
   }
 
-  if (IOREDIS_IS_ENABLED) {
-    try {
-      // Create the client instance. Default is 'redis://localhost:6379' if no options.url is provided.
-      // Or you can explicitly pass host and port: { socket: { host: 'localhost', port: 6379 } }
-      redisClientInstance = new Redis({
-        host: IOREDIS_HOST,
-        port: IOREDIS_PORT,
-      });
+  if (!isEnabled) {
+    return null;
+  }
 
-      // Attach event handlers
-      handleRedisConnectionEvents(redisClientInstance);
+  try {
+    // Create new Redis client instance with provided configuration
+    redisClientInstance = new IORedis({
+      host,
+      port,
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
+    });
 
-      // Attempt to connect
-      await redisClientInstance.connect();
-      return redisClientInstance;
-    } catch (err) {
-      console.error("Redis: Failed to initialize and connect:", err);
-      redisClientInstance = null; // Reset if connection fails
-      throw err; // Re-throw the error so the caller knows initialization failed
-    }
+    // Set up event handlers for the client
+    setupRedisEventHandlers(redisClientInstance);
+
+    return redisClientInstance;
+  } catch (err) {
+    console.error(REDIS_MESSAGES.INITIALIZATION.FAILED, err);
+    redisClientInstance = null;
+    throw err;
   }
 };
 
 /**
  * Retrieves the initialized Redis client instance.
- * @returns {redis.RedisClient|null} The Redis client instance, or null if not initialized.
+ * @returns {IORedis.Redis|null} The Redis client instance
  */
 const getRedisClient = () => {
   if (!redisClientInstance) {
-    console.warn(
-      "Redis: Client has not been initialized yet. Call initRedis() first."
-    );
+    console.warn(REDIS_MESSAGES.INITIALIZATION.NOT_INITIALIZED);
   }
   return redisClientInstance;
 };
 
 /**
- * Closes the Redis client connection.
+ * Gracefully closes the Redis client connection.
+ * @returns {Promise<void>}
  */
-const closeRedis = async () => {
-  if (redisClientInstance && typeof redisClientInstance.quit === "function") {
-    try {
-      await redisClientInstance.quit();
-      console.log("Redis: Connection gracefully closed.");
-    } catch (err) {
-      console.error("Redis: Error closing connection:", err);
-    } finally {
-      redisClientInstance = null; // Ensure the instance is cleared
-    }
-  } else {
-    console.log("Redis: No active connection to close.");
+const closeRedisConnection = async () => {
+  if (!redisClientInstance?.quit) {
+    console.log(REDIS_MESSAGES.CONNECTION.NO_ACTIVE);
+    return;
+  }
+
+  try {
+    await redisClientInstance.quit();
+    console.log(REDIS_MESSAGES.CONNECTION.CLOSED);
+  } catch (err) {
+    console.error(REDIS_MESSAGES.CONNECTION.CLOSE_ERROR, err);
+    throw err;
+  } finally {
+    redisClientInstance = null;
   }
 };
-
 module.exports = {
   initRedis,
-  getRedisClient, // Renamed for clarity
-  closeRedis,
+  getRedisClient,
+  closeRedisConnection,
 };
 
-// docker run --name my-redis -d -p 6379:6379 redis
-// docker ps
-// docker exec -it my-redis redis-cli
-// redis-cli
-// set key value
-// get key
-// del key
-// keys *
-// flushall
+/**
+ * Quick Start Guide:
+ *
+ * 1. Start Redis using Docker:
+ *    docker run --name my-redis -d -p 6379:6379 redis
+ *
+ * 2. Check container status:
+ *    docker ps
+ *
+ * 3. Connect to Redis CLI:
+ *    docker exec -it my-redis redis-cli
+ *
+ * Basic Redis Commands:
+ * - Set value: SET key value
+ * - Get value: GET key
+ * - Delete key: DEL key
+ * - List all keys: KEYS *
+ * - Clear database: FLUSHALL
+ *
+ * Usage Example:
+ * ```javascript
+ * const { initRedis, getRedisClient, closeRedisConnection } = require('./init.ioredis');
+ *
+ * // Initialize Redis
+ * await initRedis({
+ *   isEnabled: true,
+ *   host: 'localhost',
+ *   port: 6379
+ * });
+ *
+ * // Get client instance
+ * const redis = getRedisClient();
+ *
+ * // Use Redis
+ * await redis.set('key', 'value');
+ * const value = await redis.get('key');
+ *
+ * // Close connection
+ * await closeRedisConnection();
+ * ```
+ */
