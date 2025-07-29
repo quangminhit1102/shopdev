@@ -4,7 +4,7 @@
  * @fileoverview Redis Cache Repository
  * Provides a simplified interface for Redis caching operations in the ShopDev application.
  * Handles JSON serialization/deserialization and common error cases.
- * 
+ *
  * @module repositories/cache.redis.repo
  * @requires ../../dbs/init.ioredis
  */
@@ -19,7 +19,7 @@ const redisClient = getRedisClient();
 
 /**
  * Sets a value in the Redis cache
- * 
+ *
  * @async
  * @param {Object} params - The parameters for setting cache
  * @param {string} params.key - The unique key to store the value under
@@ -48,7 +48,7 @@ const setCacheIO = async ({ key, value }) => {
 
 /**
  * Sets a value in the Redis cache with an expiration time
- * 
+ *
  * @async
  * @param {string} key - The unique key to store the value under
  * @param {*} value - The value to store (will be JSON stringified)
@@ -74,7 +74,7 @@ const setCacheIOExpiration = async (key, value, expiration) => {
 
 /**
  * Retrieves a value from the Redis cache
- * 
+ *
  * @async
  * @param {Object} params - The parameters for getting cache
  * @param {string} params.key - The key to retrieve the value for
