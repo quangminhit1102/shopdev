@@ -64,7 +64,7 @@ const setCacheIOExpiration = async (key, value, expiration) => {
   }
 
   try {
-    await redisClient.setEx(key, expiration, JSON.stringify(value));
+    await redisClient.setex(key, expiration, JSON.stringify(value));
     console.log(`Cache set with expiration for key: ${key}`);
   } catch (error) {
     console.error(`Error setting cache with expiration for key ${key}:`, error);
