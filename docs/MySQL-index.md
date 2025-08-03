@@ -62,45 +62,356 @@ SELECT first_name FROM sakila.actor WHERE actor_id = 5;
 
 ## Types of Indexes
 
-### 1. B-Tree Indexes
+# MySQL Index Types Guide
 
-**Characteristics:**
+## Overview
 
-- Most commonly used index type
-- Supported by most MySQL storage engines
-- Exception: Memory engine didn't support it until MySQL 5.1
-- Allows AUTO_INCREMENT columns starting from MySQL 5.1
+MySQL indexes are data structures that improve query performance by providing faster access paths to table data. This guide covers all major index types with practical examples.
 
-**Use Cases:**
+## 1. Primary Key Index
 
-- Exact value matching
-- Range queries
-- Sorting operations
-- Prefix matching
+**Description**: Automatically creates a clustered index. Ensures uniqueness and cannot contain NULL values.
 
-### 2. Hash Indexes
+**Syntax**:
 
-**Characteristics:**
+```sql
+-- During table creation
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100)
+);
 
-- Less widely used than B-Tree indexes
-- Optimized for specific use cases
-- Very fast for equality comparisons
+-- Add to existing table
+ALTER TABLE users ADD PRIMARY KEY (id);
+```
 
-**Advantages:**
+**Example**:
 
-- Extremely fast for exact matches using `=` or `<=>`
-- Perfect for key-value store applications
+```sql
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    department VARCHAR(30)
+);
 
-**Limitations:**
+-- This query will use the primary key index
+SELECT * FROM employees WHERE emp_id = 123;
+```
 
-- Only supports equality comparisons
-- Cannot be used for range queries (`<`, `>`, `BETWEEN`)
-- Cannot optimize `ORDER BY` operations
-- MySQL cannot determine row count between two values
-- Only full keys can be used for searches (no partial key matching)
-- Affects query optimization when switching from MyISAM/InnoDB to MEMORY engine
+## 2. Unique Index
 
-### 3. Spatial (R-Tree) Indexes
+**Description**: Ensures column values are unique while allowing one NULL value.
+
+**Syntax**:
+
+```sql
+-- During table creation
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE,
+    username VARCHAR(50)
+);
+
+-- Add to existing table
+CREATE UNIQUE INDEX idx_username ON users (username);
+ALTER TABLE users ADD UNIQUE KEY idx_email (email);
+```
+
+**Example**:
+
+```sql
+CREATE TABLE customers (
+    id INT PRIMARY KEY,
+    email VARCHAR(100),
+    phone VARCHAR(15)
+);
+
+-- Create unique indexes
+CREATE UNIQUE INDEX idx_customer_email ON customers (email);
+CREATE UNIQUE INDEX idx_customer_phone ON customers (phone);
+
+-- These queries will use unique indexes
+SELECT * FROM customers WHERE email = 'john@example.com';
+SELECT * FROM customers WHERE phone = '555-1234';
+```
+
+## 3. Regular Index (Non-Unique)
+
+**Description**: Standard index for faster lookups without uniqueness constraint.
+
+**Syntax**:
+
+```sql
+-- During table creation
+CREATE TABLE products (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    category VARCHAR(50),
+    price DECIMAL(10,2),
+    INDEX idx_category (category)
+);
+
+-- Add to existing table
+CREATE INDEX idx_price ON products (price);
+ALTER TABLE products ADD INDEX idx_name (name);
+```
+
+**Example**:
+
+```sql
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    status VARCHAR(20),
+    total DECIMAL(10,2)
+);
+
+-- Create regular indexes
+CREATE INDEX idx_customer_id ON orders (customer_id);
+CREATE INDEX idx_order_date ON orders (order_date);
+CREATE INDEX idx_status ON orders (status);
+
+-- These queries will benefit from indexes
+SELECT * FROM orders WHERE customer_id = 456;
+SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-12-31';
+SELECT * FROM orders WHERE status = 'completed';
+```
+
+## 4. Composite Index (Multi-Column)
+
+**Description**: Index on multiple columns, useful for queries filtering on multiple fields.
+
+**Syntax**:
+
+```sql
+-- Create composite index
+CREATE INDEX idx_name_category ON products (name, category);
+CREATE INDEX idx_date_status ON orders (order_date, status);
+```
+
+**Example**:
+
+```sql
+CREATE TABLE blog_posts (
+    id INT PRIMARY KEY,
+    title VARCHAR(200),
+    author_id INT,
+    category VARCHAR(50),
+    published_date DATE,
+    status ENUM('draft', 'published', 'archived')
+);
+
+-- Create composite indexes
+CREATE INDEX idx_author_status ON blog_posts (author_id, status);
+CREATE INDEX idx_category_date ON blog_posts (category, published_date);
+CREATE INDEX idx_status_date ON blog_posts (status, published_date);
+
+-- Efficient queries using composite indexes
+SELECT * FROM blog_posts WHERE author_id = 123 AND status = 'published';
+SELECT * FROM blog_posts WHERE category = 'technology' AND published_date >= '2024-01-01';
+```
+
+## 5. Full-Text Index
+
+**Description**: Specialized index for full-text searches on text columns.
+
+**Syntax**:
+
+```sql
+-- During table creation
+CREATE TABLE articles (
+    id INT PRIMARY KEY,
+    title VARCHAR(200),
+    content TEXT,
+    FULLTEXT(title, content)
+);
+
+-- Add to existing table
+ALTER TABLE articles ADD FULLTEXT(title);
+CREATE FULLTEXT INDEX idx_content ON articles (content);
+```
+
+**Example**:
+
+```sql
+CREATE TABLE news_articles (
+    id INT PRIMARY KEY,
+    headline VARCHAR(300),
+    body TEXT,
+    author VARCHAR(100),
+    publish_date DATE
+);
+
+-- Add full-text index
+ALTER TABLE news_articles ADD FULLTEXT idx_search (headline, body);
+
+-- Full-text search queries
+SELECT * FROM news_articles
+WHERE MATCH(headline, body) AGAINST ('artificial intelligence');
+
+SELECT * FROM news_articles
+WHERE MATCH(headline, body) AGAINST ('+mysql -oracle' IN BOOLEAN MODE);
+```
+
+## 6. Spatial Index
+
+**Description**: Index for geometric data types and spatial operations.
+
+**Syntax**:
+
+```sql
+-- Create table with spatial column
+CREATE TABLE locations (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    coordinates POINT NOT NULL,
+    SPATIAL INDEX idx_coordinates (coordinates)
+);
+```
+
+**Example**:
+
+```sql
+CREATE TABLE restaurants (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    location POINT NOT NULL,
+    cuisine VARCHAR(50)
+);
+
+-- Add spatial index
+ALTER TABLE restaurants ADD SPATIAL INDEX idx_location (location);
+
+-- Insert spatial data
+INSERT INTO restaurants (id, name, location, cuisine) VALUES
+(1, 'Pizza Palace', ST_GeomFromText('POINT(-74.0059 40.7128)'), 'Italian'),
+(2, 'Sushi Bar', ST_GeomFromText('POINT(-74.0060 40.7130)'), 'Japanese');
+
+-- Spatial queries
+SELECT name FROM restaurants
+WHERE ST_Distance(location, ST_GeomFromText('POINT(-74.0059 40.7128)')) < 1000;
+```
+
+## 7. Hash Index
+
+**Description**: Very fast for equality lookups but not for range queries. Primarily used with MEMORY engine.
+
+**Syntax**:
+
+```sql
+-- Create MEMORY table with HASH index
+CREATE TABLE session_data (
+    session_id VARCHAR(32) PRIMARY KEY,
+    user_id INT,
+    data TEXT,
+    INDEX idx_user_hash (user_id) USING HASH
+) ENGINE=MEMORY;
+```
+
+**Example**:
+
+```sql
+CREATE TABLE cache_entries (
+    cache_key VARCHAR(100) PRIMARY KEY,
+    cache_value TEXT,
+    expiry_time TIMESTAMP,
+    INDEX idx_expiry_hash (expiry_time) USING HASH
+) ENGINE=MEMORY;
+
+-- Fast equality lookup
+SELECT cache_value FROM cache_entries WHERE cache_key = 'user_profile_123';
+```
+
+## 8. B-Tree Index (Default)
+
+**Description**: Default index type for most storage engines, good for equality and range queries.
+
+**Syntax**:
+
+```sql
+-- Explicitly specify BTREE (though it's default)
+CREATE INDEX idx_price_btree ON products (price) USING BTREE;
+```
+
+**Example**:
+
+```sql
+CREATE TABLE transactions (
+    id INT PRIMARY KEY,
+    amount DECIMAL(10,2),
+    transaction_date DATETIME,
+    account_id INT
+);
+
+-- B-Tree indexes (default type)
+CREATE INDEX idx_amount ON transactions (amount);
+CREATE INDEX idx_date ON transactions (transaction_date);
+
+-- Efficient for both equality and range queries
+SELECT * FROM transactions WHERE amount = 100.00;
+SELECT * FROM transactions WHERE amount BETWEEN 50.00 AND 200.00;
+SELECT * FROM transactions WHERE transaction_date >= '2024-01-01';
+```
+
+## Index Management Commands
+
+### View Indexes
+
+```sql
+-- Show all indexes on a table
+SHOW INDEX FROM table_name;
+SHOW KEYS FROM table_name;
+
+-- View index usage
+SHOW INDEX FROM products;
+```
+
+### Drop Indexes
+
+```sql
+-- Drop specific index
+DROP INDEX idx_name ON table_name;
+ALTER TABLE table_name DROP INDEX idx_name;
+
+-- Drop primary key
+ALTER TABLE table_name DROP PRIMARY KEY;
+```
+
+## Best Practices
+
+1. **Index Selectivity**: Create indexes on columns with high selectivity (many unique values)
+2. **Composite Index Order**: Put most selective columns first in composite indexes
+3. **Avoid Over-Indexing**: Too many indexes slow down INSERT/UPDATE/DELETE operations
+4. **Monitor Usage**: Use `EXPLAIN` to verify index usage in queries
+5. **Regular Maintenance**: Use `OPTIMIZE TABLE` for fragmented indexes
+
+### Example of Query Optimization
+
+```sql
+-- Check if query uses index
+EXPLAIN SELECT * FROM orders WHERE customer_id = 123 AND status = 'pending';
+
+-- Analyze index usage
+EXPLAIN FORMAT=JSON SELECT * FROM products WHERE category = 'electronics' AND price > 100;
+```
+
+## Summary
+
+| Index Type  | Use Case              | Storage Engine | Key Features             |
+| ----------- | --------------------- | -------------- | ------------------------ |
+| PRIMARY KEY | Unique identification | All            | Clustered, No NULLs      |
+| UNIQUE      | Unique values         | All            | One NULL allowed         |
+| INDEX       | General lookups       | All            | Non-unique               |
+| COMPOSITE   | Multi-column queries  | All            | Multiple columns         |
+| FULLTEXT    | Text searching        | InnoDB, MyISAM | Text search capabilities |
+| SPATIAL     | Geographic data       | InnoDB, MyISAM | Geometric operations     |
+| HASH        | Fast equality         | MEMORY         | Equality only            |
+| BTREE       | General purpose       | All            | Range and equality       |
+
+Choose the appropriate index type based on your query patterns, data characteristics, and performance requirements.
 
 **Characteristics:**
 
