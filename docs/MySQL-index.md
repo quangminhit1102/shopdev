@@ -5,18 +5,24 @@
 1. [Overview](#overview)
 2. [How Indexes Work](#how-indexes-work)
 3. [Types of Indexes](#types-of-indexes)
-   - [B-Tree Indexes](#1-b-tree-indexes)
-   - [Hash Indexes](#2-hash-indexes)
-   - [Spatial (R-Tree) Indexes](#3-spatial-r-tree-indexes)
-4. [Multiple-Column Indexes](#multiple-column-indexes)
-5. [Leftmost Prefix Rule](#leftmost-prefix-rule)
-6. [Query Patterns That Use Indexes](#query-patterns-that-use-indexes)
-7. [Index Limitations](#index-limitations)
-8. [Analyzing Index Usage](#analyzing-index-usage)
-9. [Best Practices](#best-practices)
-10. [Performance Considerations](#performance-considerations)
-11. [Advanced Topics](#advanced-topics)
-12. [Conclusion](#conclusion)
+   - [Primary Key Index](#1-primary-key-index)
+   - [Unique Index](#2-unique-index)
+   - [Regular Index](#3-regular-index-non-unique)
+   - [Composite Index](#4-composite-index-multi-column)
+   - [Full-Text Index](#5-full-text-index)
+   - [Spatial Index](#6-spatial-index)
+   - [Hash Index](#7-hash-index)
+   - [B-Tree Index](#8-b-tree-index-default)
+4. [Index Management](#index-management-commands)
+5. [Multiple-Column Indexes](#multiple-column-indexes)
+6. [Leftmost Prefix Rule](#leftmost-prefix-rule)
+7. [Query Patterns That Use Indexes](#query-patterns-that-use-indexes)
+8. [Index Limitations](#index-limitations)
+9. [Analyzing Index Usage](#analyzing-index-usage)
+10. [Best Practices](#best-practices)
+11. [Performance Considerations](#performance-considerations)
+12. [Advanced Topics](#advanced-topics)
+13. [Conclusion](#conclusion)
 
 ---
 
@@ -62,13 +68,11 @@ SELECT first_name FROM sakila.actor WHERE actor_id = 5;
 
 ## Types of Indexes
 
-# MySQL Index Types Guide
+# Complete MySQL Indexes Guide
 
-## Overview
+## Types of Indexes in Detail
 
-MySQL indexes are data structures that improve query performance by providing faster access paths to table data. This guide covers all major index types with practical examples.
-
-## 1. Primary Key Index
+### 1. Primary Key Index
 
 **Description**: Automatically creates a clustered index. Ensures uniqueness and cannot contain NULL values.
 
@@ -638,31 +642,32 @@ mysql> EXPLAIN SELECT * FROM users WHERE email LIKE "%m";
 
 ---
 
-## Best Practices
+## Best Practices and Guidelines
 
-### 1. Index Design
+### Design Principles
 
-- **Order matters:** Place most selective columns first
-- **Consider query patterns:** Design indexes based on actual queries
-- **Avoid over-indexing:** Each index has maintenance overhead
+1. **Index Design**
 
-### 2. Column Selection
+   - Place most selective columns first
+   - Design indexes based on actual query patterns
+   - Avoid over-indexing to minimize maintenance overhead
 
-- **Highly selective columns first:** Columns with many unique values
-- **Common query patterns:** Index columns frequently used in WHERE clauses
-- **Compound indexes:** Better than multiple single-column indexes for multi-column queries
+2. **Column Selection**
 
-### 3. Query Optimization
+   - Choose highly selective columns (many unique values)
+   - Index columns frequently used in WHERE clauses
+   - Use compound indexes over multiple single-column indexes
 
-- **Use leftmost prefix:** Structure queries to utilize leftmost columns
-- **Avoid functions in WHERE clauses:** They prevent index usage
-- **Prefer ranges over wildcards:** When possible, use range queries
+3. **Query Optimization**
 
-### 4. Monitoring and Maintenance
+   - Structure queries to utilize leftmost prefix
+   - Avoid functions in WHERE clauses
+   - Prefer range queries over wildcards
 
-- **Regular EXPLAIN analysis:** Check query execution plans
-- **Monitor slow queries:** Identify problematic queries
-- **Index usage statistics:** Remove unused indexes
+4. **Monitoring and Maintenance**
+   - Regularly use EXPLAIN for query analysis
+   - Monitor and optimize slow queries
+   - Remove unused indexes based on usage statistics
 
 ---
 
