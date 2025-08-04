@@ -427,12 +427,6 @@ Choose the appropriate index type based on your query patterns, data characteris
 - Supports efficient lookups using any dimension combination
 - Requires MySQL GIS functions like `MBRCONTAINS()`
 
-**Limitations:**
-
-- MySQL GIS support is limited
-- Most applications use PostGIS with PostgreSQL for advanced GIS needs
-
----
 
 ## Multiple-Column Indexes
 
