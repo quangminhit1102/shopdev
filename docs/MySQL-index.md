@@ -90,18 +90,17 @@ CREATE TABLE users (
 ALTER TABLE users ADD PRIMARY KEY (id);
 ```
 
-**Example**:
+```cmd
+-- MySQL cmd
+>mysql CREATE TABLE `user`(
+    -> `id` int(8) NOT NULL AUTO_INCREMENT,
+    -> `username` varchar(255) NULL DEFAULT "",
+    -> `sex` varchar(255) NULL DEFAULT "",
+    -> PRIMARY KEY (`id`) USING BTREE)
+    -> ENGINE = InnoDB COLLATE = utf8_general
 
-```sql
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    department VARCHAR(30)
-);
-
--- This query will use the primary key index
-SELECT * FROM employees WHERE emp_id = 123;
+>mysql SHOW INDEX FROM `product` \G; -> \G to log into rows
+>mysql DROP INDEX indexName ON tableName;
 ```
 
 ## 2. Unique Index
@@ -123,22 +122,9 @@ CREATE UNIQUE INDEX idx_username ON users (username);
 ALTER TABLE users ADD UNIQUE KEY idx_email (email);
 ```
 
-**Example**:
-
-```sql
-CREATE TABLE customers (
-    id INT PRIMARY KEY,
-    email VARCHAR(100),
-    phone VARCHAR(15)
-);
-
--- Create unique indexes
-CREATE UNIQUE INDEX idx_customer_email ON customers (email);
-CREATE UNIQUE INDEX idx_customer_phone ON customers (phone);
-
--- These queries will use unique indexes
-SELECT * FROM customers WHERE email = 'john@example.com';
-SELECT * FROM customers WHERE phone = '555-1234';
+```cmd
+-- MySQL cmd
+>mysql CREATE UNIQUE INDEX indexName ON tableName (columnName(length))
 ```
 
 ## 3. Regular Index (Non-Unique)
@@ -221,6 +207,17 @@ SELECT * FROM blog_posts WHERE category = 'technology' AND published_date >= '20
 ## 5. Full-Text Index
 
 **Description**: Specialized index for full-text searches on text columns.
+
+**Note**: MySQL full-text indexes ignore words that are too short or too long. Words outside these limits won't be searchable via MATCH() AGAINST().
+
+Default Settings
+MyISAM:ft_min_word_len = 4 (ignores words < 4 chars)
+ft_max_word_len = 84 (ignores words > 84 chars)
+InnoDB:innodb_ft_min_token_size = 3 (ignores words < 3 chars)
+innodb_ft_max_token_size = 84 (ignores words > 84 chars)
+
+Check Current Settings
+SHOW VARIABLES LIKE '%ft%';
 
 **Syntax**:
 
@@ -426,7 +423,6 @@ Choose the appropriate index type based on your query patterns, data characteris
 - Doesn't require leftmost prefix in WHERE clauses
 - Supports efficient lookups using any dimension combination
 - Requires MySQL GIS functions like `MBRCONTAINS()`
-
 
 ## Multiple-Column Indexes
 
