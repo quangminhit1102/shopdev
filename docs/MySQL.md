@@ -71,3 +71,57 @@ SELECT * FROM information_schema.PROCESSLIST WHERE COMMAND != 'Sleep';
 | Threads_running   | 2     |
 +-------------------+-------+
 ```
+
+# MySQL Transaction ACID principles
+
+## What is ACID?
+
+ACID ensures database reliability through four key principles:
+
+### **A**tomicity - All or Nothing
+
+Either all operations succeed or none do. If any part fails, everything rolls back.
+
+### **C**onsistency - Valid State
+
+Database remains valid according to all rules and constraints.
+
+### **I**solation - No Interference
+
+Multiple transactions don't interfere with each other.
+
+### **D**urability - Permanent Storage
+
+Committed changes survive system crashes.
+
+## Simple Example
+
+```sql
+-- Bank transfer example
+START TRANSACTION;
+
+UPDATE accounts SET balance = balance - 100 WHERE id = 1; -- Debit account
+UPDATE accounts SET balance = balance + 100 WHERE id = 2; -- Credit account
+
+-- If both succeed:
+COMMIT;
+
+-- If either fails:
+-- ROLLBACK; (happens automatically on error)
+```
+
+## Key Commands
+
+- `START TRANSACTION` - Begin transaction
+- `COMMIT` - Save all changes
+- `ROLLBACK` - Undo all changes
+- `SET TRANSACTION ISOLATION LEVEL` - Control isolation
+
+## Implementation
+
+MySQL's InnoDB storage engine provides ACID compliance through:
+
+- Redo logs (durability)
+- Undo logs (atomicity)
+- Locking & MVCC (isolation)
+- Constraint checking (consistency)

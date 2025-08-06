@@ -170,7 +170,7 @@ SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-12-31';
 SELECT * FROM orders WHERE status = 'completed';
 ```
 
-## 4. Composite Index (Multi-Column)
+## 4. Composite Index (Multi-Column) - most used
 
 **Description**: Index on multiple columns, useful for queries filtering on multiple fields.
 
@@ -211,13 +211,17 @@ SELECT * FROM blog_posts WHERE category = 'technology' AND published_date >= '20
 **Note**: MySQL full-text indexes ignore words that are too short or too long. Words outside these limits won't be searchable via MATCH() AGAINST().
 
 Default Settings
-MyISAM:ft_min_word_len = 4 (ignores words < 4 chars)
-ft_max_word_len = 84 (ignores words > 84 chars)
-InnoDB:innodb_ft_min_token_size = 3 (ignores words < 3 chars)
-innodb_ft_max_token_size = 84 (ignores words > 84 chars)
+
+- MyISAM:ft_min_word_len = 4 (ignores words < 4 chars)
+- ft_max_word_len = 84 (ignores words > 84 chars)
+- InnoDB:innodb_ft_min_token_size = 3 (ignores words < 3 chars)
+- innodb_ft_max_token_size = 84 (ignores words > 84 chars)
 
 Check Current Settings
-SHOW VARIABLES LIKE '%ft%';
+
+```cmd
+>mysql SHOW VARIABLES LIKE '%ft%';
+```
 
 **Syntax**:
 
