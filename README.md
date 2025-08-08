@@ -292,11 +292,3 @@ Centralized error handling with custom error classes:
 | `CLOUDINARY_NAME`   | Cloudinary cloud name     | Yes      |
 | `CLOUDINARY_KEY`    | Cloudinary API key        | Yes      |
 | `CLOUDINARY_SECRET` | Cloudinary API secret     | Yes      |
-
-## 📞 Support
-
-For support and questions, please refer to the documentation in the `docs/` folder or create an issue in the repository.
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
