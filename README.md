@@ -196,19 +196,6 @@ The backend will be available at `http://localhost:3055` and the frontend at `ht
 
 For complete API documentation, visit `/api-docs` when the server is running.
 
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run specific test suite
-npm test -- tests/services
-
-# Run tests with coverage
-npm run test:coverage
-```
-
 ## 🔒 Security Features
 
 - **HTTP Security Headers**: Implemented with Helmet.js
