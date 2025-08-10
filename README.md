@@ -196,19 +196,6 @@ The backend will be available at `http://localhost:3055` and the frontend at `ht
 
 For complete API documentation, visit `/api-docs` when the server is running.
 
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run specific test suite
-npm test -- tests/services
-
-# Run tests with coverage
-npm run test:coverage
-```
-
 ## 🔒 Security Features
 
 - **HTTP Security Headers**: Implemented with Helmet.js
@@ -292,11 +279,3 @@ Centralized error handling with custom error classes:
 | `CLOUDINARY_NAME`   | Cloudinary cloud name     | Yes      |
 | `CLOUDINARY_KEY`    | Cloudinary API key        | Yes      |
 | `CLOUDINARY_SECRET` | Cloudinary API secret     | Yes      |
-
-## 📞 Support
-
-For support and questions, please refer to the documentation in the `docs/` folder or create an issue in the repository.
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
