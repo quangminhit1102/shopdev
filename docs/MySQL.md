@@ -114,8 +114,9 @@ COMMIT;
 
 - `START TRANSACTION` - Begin transaction
 - `COMMIT` - Save all changes
-- `ROLLBACK` - Undo all changes
+- `ROLLBACK (To)` - Undo all changes or go to a savepoint
 - `SET TRANSACTION ISOLATION LEVEL` - Control isolation
+- `SAVEPOINT <name of point>` - Set a savepoint within a transaction
 
 ## Implementation
 
