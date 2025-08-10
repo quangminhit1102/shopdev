@@ -75,7 +75,11 @@ SET GLOBAL innodb_print_all_deadlocks = ON;
 
 ## Prevention Strategies
 
+**Summary**: The key to preventing deadlocks is eliminating circular dependencies between transactions. This is achieved by ensuring transactions acquire locks in a predictable, consistent manner and minimizing the time locks are held.
+
 ### 1. Consistent Lock Ordering
+**Why it works**: When all transactions acquire locks in the same order, circular dependencies cannot form.
+
 ```sql
 -- BAD: Different order in transactions
 -- Transaction A: UPDATE id=1 then id=2
@@ -87,6 +91,8 @@ UPDATE users SET name = 'New' WHERE id IN (1,2) ORDER BY id;
 ```
 
 ### 2. Keep Transactions Short
+**Why it works**: Shorter transactions hold locks for less time, reducing the window for deadlock conditions.
+
 ```sql
 -- BAD: Long transaction
 BEGIN;
@@ -103,6 +109,8 @@ COMMIT;
 ```
 
 ### 3. Use Lower Isolation Levels
+**Why it works**: Lower isolation levels require fewer locks, reducing lock contention and deadlock probability.
+
 ```sql
 -- Reduce lock contention
 SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
@@ -111,6 +119,8 @@ SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 ```
 
 ### 4. Use Proper Indexes
+**Why it works**: Good indexes allow precise locking of specific rows instead of locking entire ranges or tables.
+
 ```sql
 -- Ensures efficient locking
 CREATE INDEX idx_customer_date ON orders (customer_id, order_date);
