@@ -207,3 +207,7 @@ So while Redis Pub/Sub is excellent for real-time notifications, chat systems, o
 - Monitor with: `redis-cli INFO stats | grep expired`
 - Use logical expiration for costly-to-recreate objects
 - Remember: Keys with TTL still consume memory until deletion
+
+![Caching in System Design](../Images/CachingInSystemDesign.svg)
+
+![Redis Get Cache Middleware](../Images/RedisGetCacheMiddleware.svg)
