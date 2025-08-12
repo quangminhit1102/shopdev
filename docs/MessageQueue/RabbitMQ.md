@@ -89,5 +89,5 @@ Dead-lettering in RabbitMQ occurs when messages are republished to an exchange d
 
 - **Delivery limit exceeded**: The message is returned more times than the allowed threshold in a quorum queue.
 
-![alt text](Images/RabbitMQ-DelayTTL.png)
 TTL: Time to Live
+![RabbitMQ Dead Letter Exchange](../Images/RabbitMQ-DelayTTL.png)
