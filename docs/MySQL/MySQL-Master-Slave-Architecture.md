@@ -2,7 +2,7 @@
 
 ## Definition
 
-![alt text](./Images/master-slave-architecture.webp)
+![alt text](../Images/master-slave-architecture.webp)
 
 A system design with one central "master" node controlling multiple "slave" nodes. Master assigns tasks, slaves execute and report back. Enables parallel processing and load balancing.
 
@@ -49,7 +49,7 @@ A system design with one central "master" node controlling multiple "slave" node
 
 MySQL Replication is a technology that allows creating and maintaining multiple copies of MySQL databases through automatic replication from a master server to slave servers.
 
-![alt text](<Images/MySQL Replication Master-Slave.png>)
+![alt text](../Images/MySQL%20Replication%20Master-Slave.png)
 
 **How it Works** The master server stores the primary database serving applications, while slave servers store replica copies. All changes on the master are recorded in binary log format, which slaves read and execute corresponding operations to synchronize data. This binary read/write/execute process operates very quickly.
 
